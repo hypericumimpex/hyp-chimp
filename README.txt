@@ -3,13 +3,30 @@
 Contributors: yithemes
 Tags: mailchimp, woocommerce, checkout, themes, yit, e-commerce, shop, newsletter, subscribe, subscription, marketing, signup, order, email, mailchimp for wordpress, mailchimp for wp, mailchimp signup, mailchimp subscribe, newsletter, newsletter subscribe, newsletter checkbox, double optin
 Requires at least: 4.0
-Tested up to: 4.9.8
-Stable tag: 1.1.5
+Tested up to: 5.0.3
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Documentation: https://yithemes.com/docs-plugins/yith-woocommerce-mailchimp
 
 == Changelog ==
+
+= 2.0.0 - Released: Feb, 07 - 2019 =
+
+* New: WooCommerce 3.5.4 support
+* New: support to MailChimp API 3.0
+* New: Store integration
+* New: sync procedure, to register existing customers and orders to MailChimp
+* Update: internal plugin framework
+* Tweak: reviewed method that performs API calls
+* Fix: "at least one in cart" condition, not working as expected
+* Dev: added filter yith_wcmc_privacy_policy_shortcode_label for privacy policy checkbox label
+* Dev: added yith_wcmc_process_order_args filter
+* Dev: added yith_wcmc_process_product_args filter
+* Dev: added yith_wcmc_process_product_variant_args filter
+* Dev: added yith_wcmc_process_promo_rule_args filter
+* Dev: added yith_wcmc_process_cart_args filter
+* Dev: added yith_wcmc_process_customer_history filter
 
 = 1.1.5 - Released: Oct, 24 - 2018 =
 

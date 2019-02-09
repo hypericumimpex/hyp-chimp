@@ -71,8 +71,6 @@ if ( ! class_exists( 'YITH_WCMC_Widget' ) ) {
 				'email_type' => get_option( 'yith_wcmc_widget_email_type', 'html' ),
 				'double_optin' => get_option( 'yith_wcmc_widget_double_optin' ),
 				'update_existing' => get_option( 'yith_wcmc_widget_update_existing' ),
-				'replace_interests' => get_option( 'yith_wcmc_widget_replace_interests' ),
-				'send_welcome' => get_option( 'yith_wcmc_widget_send_welcome' ),
 				'list' => get_option( 'yith_wcmc_widget_mailchimp_list' ),
 				'groups' => implode( '#%,%#', get_option( 'yith_wcmc_widget_mailchimp_groups', array() ) ),
 				'groups_to_prompt' => implode( '#%,%#', get_option( 'yith_wcmc_widget_mailchimp_groups_selectable', array() ) ),

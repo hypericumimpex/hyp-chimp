@@ -2,13 +2,7 @@
 	<div class="account-banner">
 		<div class="account-avatar">
 			<div class="account-thumb">
-				<?php if( ! empty( $avatar ) ): ?>
-					<img src="<?php echo $avatar ?>" alt="<?php echo $username; ?>" width="66" heigth="66" />
-				<?php
-				else:
-					echo get_avatar( 0, 96 );
-				endif;
-				?>
+				<? echo get_avatar( $email, 96 ); ?>
 			</div>
 			<div class="account-name tips" data-tip="<?php echo ! empty( $username ) ? __( 'MailChimp user', 'yith-woocommerce-mailchimp' ) : __( 'No user can be found with this API key', 'yith-woocommerce-mailchimp' )?>">
 				<?php echo ! empty( $username ) ? $username : __( '&lt; Not Found &gt;' ); ?>
@@ -41,14 +35,14 @@
 </div>
 
 <div class="list-stat-container">
-	<?php if( ! empty( $lists['data'] ) ):?>
+	<?php if( ! empty( $lists['lists'] ) ):?>
 
 		<div class="carousel_controls">
 			<a class="prev" href="#"><?php _e( 'Prev', 'yith-woocommerce-mailchimp' ) ?></a>
 			<a class="next" href="#"><?php _e( 'Next', 'yith-woocommerce-mailchimp' ) ?></a>
 		</div>
 		<div class="yith_wcmc_list_stats">
-			<?php foreach( $lists['data'] as $list ): ?>
+			<?php foreach( $lists['lists'] as $list ): ?>
 				<div class="list-stat">
 					<h3><?php echo esc_html( $list['name'] ) ?></h3>
 					<table>
@@ -62,28 +56,28 @@
 						<tr>
 							<th><?php _e( 'Avg sub rate' )?></th>
 							<td>
-								<span class="number"><?php echo esc_attr( $list['stats']['avg_sub_rate'] )?></span>
+								<span class="number"><?php echo esc_attr( number_format( $list['stats']['avg_sub_rate'], 2 ) )?>%</span>
 								<span class="description"><?php _e( 'per month', 'yith-woocommerce-mailchimp' )?></span>
 							</td>
 						</tr>
 						<tr>
 							<th><?php _e( 'Avg unsub rate' )?></th>
 							<td>
-								<span class="number"><?php echo esc_attr( $list['stats']['avg_unsub_rate'] )?></span>
+								<span class="number"><?php echo esc_attr( number_format( $list['stats']['avg_unsub_rate'], 2 ) )?>%</span>
 								<span class="description"><?php _e( 'per month', 'yith-woocommerce-mailchimp' )?></span>
 							</td>
 						</tr>
 						<tr>
 							<th><?php _e( 'Open rate' )?></th>
 							<td>
-								<span class="number"><?php echo esc_attr( $list['stats']['open_rate'] )?></span>
+								<span class="number"><?php echo esc_attr( number_format( $list['stats']['open_rate'], 2 ) )?>%</span>
 								<span class="description"><?php _e( 'per campaign', 'yith-woocommerce-mailchimp' )?></span>
 							</td>
 						</tr>
 						<tr>
 							<th><?php _e( 'Click rate' )?></th>
 							<td>
-								<span class="number"><?php echo esc_attr( $list['stats']['click_rate'] )?></span>
+								<span class="number"><?php echo esc_attr( number_format( $list['stats']['click_rate'], 2 ) )?>%</span>
 								<span class="description"><?php _e( 'per campaign', 'yith-woocommerce-mailchimp' )?></span>
 							</td>
 						</tr>

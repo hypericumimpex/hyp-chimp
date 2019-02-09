@@ -11,6 +11,8 @@ if ( ! defined( 'YITH_WCMC' ) ) {
 	exit;
 } // Exit if accessed directly
 
+use \DrewM\MailChimp\MailChimp;
+
 if ( ! class_exists( 'YITH_WCMC' ) ) {
 	/**
 	 * WooCommerce Mailchimp
@@ -18,6 +20,14 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 	 * @since 1.0.0
 	 */
 	class YITH_WCMC {
+		/**
+		 * Current version of the API
+		 *
+		 * @var string
+		 * @since 2.0.0
+		 */
+		const API_VERSION = '3.0';
+
 		/**
 		 * Single instance of the class
 		 *
@@ -35,12 +45,46 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		protected $mailchimp = null;
 
 		/**
+		 * A list of the operations executed during last batch session
+		 *
+		 * System collects them instead of performing direct calls, to process a single batch call
+		 * System consider current execution as a batch session if defined( 'YITH_WCMC_DOING_BATCH' ) && YITH_WCMC_DOING_BATCH
+		 *
+		 * @var array
+		 * @since 2.0.0
+		 */
+		protected $batch_ops = array();
+
+		/**
+		 * Logger instance
+		 *
+		 * @var \WC_Logger
+		 */
+		protected $_log;
+
+		/**
 		 * Cachable requests
 		 *
 		 * @var array
 		 * @since 1.0.0
 		 */
 		public $cachable_requests = array();
+
+		/**
+		 * Available MailChimp API REST methods
+		 *
+		 * @var array
+		 * @since 1.1
+		 */
+		public static $available_api_methods = array( 'get', 'post', 'delete', 'put', 'patch' );
+
+		/**
+		 * Call timeout (seconds)
+		 *
+		 * @var int
+		 * @since 1.1
+		 */
+		public static $timeout = 600;
 
 		/**
 		 * Returns single instance of the class
@@ -69,19 +113,21 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		 * @since 1.0.0
 		 */
 		public function __construct() {
-			// init cachable requests
-			add_action( 'init', array( $this, 'init_cachable_requests' ) );
+			// init plugin
+			add_action( 'init', array( $this, 'install' ), 5 );
 
 			// load plugin-fw
 			add_action( 'plugins_loaded', array( $this, 'plugin_fw_loader' ), 15 );
 			add_action( 'plugins_loaded', array( $this, 'privacy_loader' ), 20 );
 
-			// init api key
+			// init api key when updating license key
 			add_action( 'update_option_yith_wcmc_mailchimp_api_key', array( $this, 'init_api' ) );
-			$this->init_api();
 
 			// handle ajax requests
 			add_action( 'wp_ajax_do_request_via_ajax', array( $this, 'do_request_via_ajax' ) );
+			add_action( 'wp_ajax_retrieve_lists_via_ajax', array( $this, 'retrieve_lists_via_ajax' ) );
+			add_action( 'wp_ajax_retrieve_groups_via_ajax', array( $this, 'retrieve_groups_via_ajax' ) );
+			add_action( 'wp_ajax_retrieve_fields_via_ajax', array( $this, 'retrieve_fields_via_ajax' ) );
 
 			// update checkout page
 			add_action( 'init', array( $this, 'add_subscription_checkbox' ) );
@@ -93,16 +139,246 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		}
 
 		/**
+		 * Run pre-mission checklist
+		 *
+		 * @return void
+		 * @since 2.0.0
+		 */
+		public function install() {
+			// install api
+			$this->install_api();
+
+			// install db
+			$this->install_db();
+
+			// install logger
+			$this->install_log();
+
+			// install cachable API
+			$this->install_cachable_requests();
+
+			do_action( 'yith_wcmc_standby' );
+		}
+
+		/**
+		 * Install API for the plugin
+		 *
+		 * @return void
+		 * @since 2.0.0
+		 */
+		public function install_api() {
+			$previous_version = str_replace( '.', '', get_option( 'yith_wcmc_api_version', '' ) );
+			$current_version = str_replace( '.', '', self::API_VERSION );
+
+			$this->init_api();
+
+			if( $previous_version != $current_version ){
+				if( $previous_version ){
+					$action = "yith_wcmc_api_{$previous_version}_to_{$current_version}";
+				}
+				else{
+					$action = "yith_wcmc_api_{$current_version}";
+				}
+
+				do_action( $action );
+
+				update_option( 'yith_wcmc_api_version', self::API_VERSION );
+			}
+		}
+
+		/**
+		 * Install db tables when updating to new version of db structure
+		 *
+		 * @return void
+		 * @since 2.0.0
+		 */
+		public function install_db() {
+			global $wpdb;
+
+			// adds tables name in global $wpdb
+			$wpdb->yith_wcmc_register = $wpdb->prefix . 'yith_wcmc_register';
+
+			$current_db_version = get_option( 'yith_wcmc_db_version', '' );
+			if( version_compare( $current_db_version, YITH_WCMC_DB_VERSION, '>=' ) ) {
+				return;
+			}
+
+			// perform related operation for specific db update
+			add_action( 'yith_wcmc_update_db_2.0.0', array( $this, 'install_update_200' ) );
+
+			do_action( 'yith_wcmc_update_db_' . YITH_WCMC_DB_VERSION );
+			update_option( 'yith_wcmc_db_version', YITH_WCMC_DB_VERSION );
+		}
+
+		/**
+		 * Install logger
+		 *
+		 * @return void
+		 * @since 2.0.0
+		 */
+		public function install_log() {
+			$this->_log = new WC_Logger();
+		}
+
+		/**
 		 * Init cachable requests array
 		 *
 		 * @return void
 		 * @since 1.1.2
 		 */
-		public function init_cachable_requests() {
+		public function install_cachable_requests() {
 			$this->cachable_requests = apply_filters( 'yith_wcmc_cachable_requests', array(
-				'lists/list',
-				'users/profile'
+				'lists',
+				'lists\/(.*)',
+				'users\/profile',
+				'ecommerce\/stores\/(.*)'
 			) );
+		}
+
+		/**
+		 * Updated options when moving from 1.x to 2.x version
+		 *
+		 * @return void
+		 * @since 2.0.0
+		 */
+		public function install_update_200() {
+			$options_to_update = array(
+				array(
+					'name' => 'yith_wcmc_mailchimp_groups',
+					'index' => '',
+					'set' => false,
+					'list_option' => 'yith_wcmc_mailchimp_list',
+					'list_index' => ''
+				),
+				array(
+					'name' => 'yith_wcmc_advanced_integration',
+					'index' => 'groups',
+					'set' => true,
+					'list_option' => '',
+					'list_index' => 'list'
+				),
+				array(
+					'name' => 'yith_wcmc_shortcode_mailchimp_groups',
+					'index' => '',
+					'set' => false,
+					'list_option' => 'yith_wcmc_shortcode_mailchimp_list',
+					'list_index' => ''
+				),
+				array(
+					'name' => 'yith_wcmc_shortcode_mailchimp_groups_selectable',
+					'index' => '',
+					'set' => false,
+					'list_option' => 'yith_wcmc_shortcode_mailchimp_list',
+					'list_index' => ''
+				),
+				array(
+					'name' => 'yith_wcmc_widget_mailchimp_groups',
+					'index' => '',
+					'set' => false,
+					'list_option' => 'yith_wcmc_widget_mailchimp_list',
+					'list_index' => ''
+				),
+				array(
+					'name' => 'yith_wcmc_widget_mailchimp_groups_selectable',
+					'index' => '',
+					'set' => false,
+					'list_option' => 'yith_wcmc_widget_mailchimp_list',
+					'list_index' => ''
+				)
+			);
+
+			foreach( $options_to_update as $option ){
+				$option_value = get_option( $option['name'], array() );
+
+				if( ! $option_value ){
+					continue;
+				}
+
+				if( ! empty( $option['list_option'] ) ){
+					$list = get_option( $option['list_option'] );
+				}
+
+				if( $option['set'] && ! empty( $option_value ) ){
+					foreach( $option_value as $id => $subset ){
+						if( ! empty( $option['index'] ) && isset( $subset[ $option['index'] ] ) ) {
+							if( empty( $option['list_option'] ) && isset( $option['list_index'] ) && ! empty( $subset[ $option['list_index'] ] ) ){
+								$list = $subset[ $option['list_index'] ];
+							}
+
+							if( $list ) {
+								$option_value[ $id ][ $option['index'] ] = $this->_update_groups_to_200_format( $subset[ $option['index'] ], $list );
+							}
+						}
+						elseif( empty( $option['index'] ) && ! empty( $option['list_option'] ) ){
+							$option_value[ $id ] = $this->_update_groups_to_200_format( $subset, $list );
+						}
+					}
+				}
+				else{
+					if( ! empty( $option['index'] ) && isset( $option_value[ $option['index'] ] ) ) {
+						if( empty( $option['list_option'] ) && isset( $option['list_index'] ) && ! empty( $option_value[ $option['list_index'] ] ) ){
+							$list = $option_value[ $option['list_index'] ];
+						}
+
+						if( $list ) {
+							$option_value[ $option['index'] ] = $this->_update_groups_to_200_format( $option_value[ $option['index'] ], $list );
+						}
+					}
+					elseif( empty( $option['index'] ) && ! empty( $option['list_option'] ) ){
+						$option_value = $this->_update_groups_to_200_format( $option_value, $list );
+					}
+				}
+
+				update_option( $option['name'], $option_value );
+			}
+		}
+
+		/**
+		 * Update groups to new format
+		 *
+		 * @param $group_options array Group array formatted in old style groupID-interestName
+		 * @param $list string Related list
+		 *
+		 * @return array Array of groups formatted in new style groupID-interestID
+		 * @since 2.0.0
+		 */
+		protected function _update_groups_to_200_format( $group_options, $list ){
+			$new_option_value = array();
+			$api_key = get_option( 'yith_wcmc_mailchimp_api_key' );
+
+			if( ! empty( $group_options ) && ! empty( $list ) && $api_key ){
+				$legacy_groups = yith_wcmc_retrieve_legacy_groups( $list );
+				$list_groups = $this->retrieve_groups( $list );
+
+				foreach( $group_options as $option ){
+					list( $group_id, $interest_name ) = explode( '-', $option );
+
+					if( ! isset( $legacy_groups[ $group_id ] ) ){
+						continue;
+					}
+
+					$group_name = $legacy_groups[ $group_id ]['name'];
+
+					/**
+					 * It seems that previous group ID are no longer valid on API 3.0
+					 * A complete new ID is show through API
+					 *
+					 * We need to rely just on interest and group name, but this could lead to unexpected behaviour
+					 *
+					 * In this  case first encountered will be considered as the current option, and this may lead to major issues
+					 *
+					 * Old format: group_id-Group Name
+					 * New format: interest_category_id-interest_id
+					 */
+					foreach( $list_groups as $new_option => $name ){
+						if( $name == "{$group_name} - {$interest_name}" ){
+							$new_option_value[] = $new_option;
+						}
+					}
+				}
+			}
+
+			return $new_option_value;
 		}
 
 		/* === PLUGIN FW LOADER === */
@@ -138,6 +414,30 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 			}
 		}
 
+		/* === LOG METHODS === */
+
+		/**
+		 * Return single instance of logger class
+		 *
+		 * @return \WC_Logger
+		 * @since 2.0.0
+		 */
+		public function get_logger() {
+			return $this->_log;
+		}
+
+		/**
+		 * Log messages to system logger
+		 *
+		 * @param $message string Log message
+		 * @param $level string Type of log (emergency|alert|critical|error|warning|notice|info|debug)
+		 */
+		public function log( $message, $level = 'info' ) {
+			$message = '(' . microtime() . ') ' . $message;
+
+			$this->_log->add( 'yith_wcmc', $message, $level );
+		}
+
 		/* === HANDLE REQUEST TO MAILCHIMP === */
 
 		/**
@@ -149,10 +449,18 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		public function init_api() {
 			$api_key = get_option( 'yith_wcmc_mailchimp_api_key' );
 
-			$init_options = array( 'ssl_verifypeer' => false );
-
 			if( ! empty( $api_key ) ){
-				$this->mailchimp = new Mailchimp( $api_key, $init_options );
+				try {
+					$this->mailchimp = new Mailchimp( $api_key );
+
+					// Disable verify peer when not under ssl
+					if ( ! is_ssl() ) {
+						$this->mailchimp->verify_ssl = false;
+					}
+				}
+				catch( Exception $e ){
+					$this->mailchimp = null;
+				}
 			}
 			else{
 				$this->mailchimp = null;
@@ -162,15 +470,17 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		/**
 		 * Retrieve lists registered for current API Key
 		 *
+		 * @param $force_update bool Whether to force update of cache
+		 *
 		 * @return array Array of available list, in id -> name format
 		 * @since 1.0.0
 		 */
-		public function retrieve_lists() {
-			$lists = $this->do_request( 'lists/list', array( 'sort_field' => 'web' ) );
+		public function retrieve_lists( $force_update = false ) {
+			$lists = $this->do_request( 'get', 'lists', array(), $force_update );
 
 			$list_options = array();
-			if( ! empty( $lists['data'] ) ){
-				foreach( $lists['data'] as $list ){
+			if( ! empty( $lists['lists'] ) ){
+				foreach( $lists['lists'] as $list ){
 					$list_options[ $list['id'] ] = $list['name'];
 				}
 			}
@@ -182,20 +492,24 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		 * Retrieve interest groups registered for passed list
 		 *
 		 * @param string $list Id of the list, used to retrieve groups
+		 * @param $force_update bool Whether to force update of cache
 		 *
 		 * @return array Array of available groups, formatted as ( group_id - interest_name ) -> ( group_name - interest_name ) format
 		 * @since 1.0.0
 		 */
-		public function retrieve_groups( $list ) {
+		public function retrieve_groups( $list, $force_update = false ) {
 			$groups_options = array();
 			if( ! empty( $list ) ){
-				$groups = YITH_WCMC()->do_request( 'lists/interest-groupings', array( 'id' => $list )  );
+				$interests_categories = $this->do_request( 'get', "lists/{$list}/interest-categories", array(), $force_update );
 
-				if( ! empty( $groups ) && is_array( $groups ) ){
-					foreach( $groups as $interest_group ){
-						if( ! empty( $interest_group['groups'] ) && is_array( $interest_group['groups'] ) ){
-							foreach( $interest_group['groups'] as $group ){
-								$groups_options[ $interest_group['id'] . '-' . $group['name'] ] = $interest_group['name'] . ' - '  .$group['name'];
+				if( ! empty( $interests_categories['categories'] ) && is_array( $interests_categories['categories'] ) ){
+					foreach( $interests_categories['categories'] as $interests_category ){
+						$category_id = $interests_category['id'];
+						$interests = $this->do_request( 'get', "lists/{$list}/interest-categories/{$category_id}/interests", array(), $force_update );
+
+						if( ! empty( $interests['interests'] ) && is_array( $interests['interests'] )  ){
+							foreach( $interests['interests'] as $interest ){
+								$groups_options[ $interests_category['id'] . '-' . $interest['id'] ] = $interests_category['title'] . ' - ' . $interest['name'];
 							}
 						}
 					}
@@ -209,29 +523,27 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		 * Retrieve merge fields for passed list
 		 *
 		 * @param string $list Id of the list, used to retrieve groups
+		 * @param $force_update bool Whether to force update of cache
 		 *
 		 * @return array Array of available merge vars, formatted as tag -> name format
 		 * @since 1.0.0
 		 */
-		public function retrieve_fields( $list ) {
+		public function retrieve_fields( $list, $force_update = false ) {
 			$fields = array();
 
 			if( ! empty( $list ) ){
-				$response = $this->do_request( 'lists/merge-vars', array( 'id' => array( $list ) ) );
+				$response = $this->do_request( 'get', "lists/{$list}/merge-fields", array(), $force_update );
 
-				if( ! empty( $response['data'] ) ){
-					$merge_fields_array = $response['data'];
+				if( ! empty( $response['merge_fields'] ) ){
+					$merge_fields = $response['merge_fields'];
 
-					foreach( $merge_fields_array as $merge_fields ){
-						if( ! empty( $merge_fields['merge_vars'] ) ){
-							$merge_fields = $merge_fields['merge_vars'];
-
-							foreach( $merge_fields as $field ){
-								$fields[ $field['tag'] ] = $field['name'];
-							}
-						}
+					foreach( $merge_fields as $field ){
+						$fields[ $field['tag'] ] = $field['name'];
 					}
 				}
+
+				// add email, since API 3.0 won't return it
+				$fields['EMAIL'] = _x( 'Email Address', 'Default email field name (backend)', 'yith-woocommerce-mailchimp' );
 			}
 
 			return $fields;
@@ -251,18 +563,32 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 				return false;
 			}
 
-			$args = array_merge( array(
+			$args = apply_filters( 'yith_wcmc_subscribe_args', array_merge( array(
 				'id' => $list,
-				'email' => array(
-					'email' => $email,
-				),
+				'email_address' => $email,
 				'email_type' => 'html',
-				'double_optin' => false,
-				'update_existing' => true,
-				'send_welcome' => false,
-			), $args );
+				'status' => 'subscribed'
+			), $args ) );
 
-			$res = $this->do_request( 'lists/subscribe', apply_filters( 'yith_wcmc_subscribe_args', $args ) );
+			$member_hash = md5( strtolower( $args['email_address'] ) );
+
+			if( ! isset( $args['update_existing'] ) ){
+
+			}
+			elseif( $args['update_existing'] ){
+				$method = 'put';
+				$path = "lists/{$list}/members/{$member_hash}";
+
+				unset( $args['update_existing'] );
+			}
+			else{
+				$method = 'post';
+				$path = "lists/{$list}/members";
+
+				unset( $args['update_existing'] );
+			}
+
+			$res = $this->do_request( $method, $path, $args );
 
 			return $res;
 		}
@@ -306,59 +632,171 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		 * @return mixed API response (as an associative array)
 		 * @since 1.0.0
 		 */
-		public function do_request( $request, $args = array(), $force_update = false ) {
+		public function do_request( $method, $request = '', $args = array(), $force_update = false ) {
 			if( is_null( $this->mailchimp ) ){
+				return false;
+			}
+
+			if( ! in_array( $method, self::$available_api_methods ) ){
+				return false;
+			}
+
+			if( yith_wcmc_doing_batch() && $method != 'get' && $request != 'batches' ){
+				$this->batch_ops[] = array(
+					'method' => $method,
+					'path' => $request,
+					'body' => json_encode( $args )
+				);
+
 				return false;
 			}
 
 			$api_key        = get_option( 'yith_wcmc_mailchimp_api_key' );
 			$transient_name = 'yith_wcmc_' . md5( $api_key );
+			$transient_key  = $request . '_' . md5( json_encode( $args ) );
 			$data           = get_transient( $transient_name );
 
-			if( in_array( $request, $this->cachable_requests ) && ! $force_update && ! empty( $data ) && isset( $data[ $request ] ) ) {
-				return $data[ $request ];
+			// check if request is could be stored in cache
+			$cachable = false;
+			if( ! empty( $this->cachable_requests ) ){
+				foreach ( $this->cachable_requests as $cachable_request ){
+					if( preg_match( '/^' . $cachable_request . '$/', $request ) ){
+						$cachable = true;
+						break;
+					}
+				}
 			}
 
+			// retrieve result from cache when possible
+			if( 'get' == $method && $cachable && ! $force_update && ! empty( $data ) && isset( $data[ $transient_key ] ) ) {
+				return $data[ $transient_key ];
+			}
+
+			// cache miss; let's proceed with API call
 			try {
-				switch( $request ){
-					case 'lists/list':
-						// set max limit possible
-						$args['limit'] = 100;
+				$result = NULL;
 
-						// retrieve first result page
-						$result = $this->mailchimp->call( $request, $args );
+				// execute API call
+				$result = $this->_call_rest_api( $method, $request, $args );
 
-						// init loop to get all lists pages
-						$i = 1;
-
-						while( ! empty( $result['total'] ) && $result['total'] > count( $result['data'] ) ){
-							$args['start'] = $i++;
-							$current_page = $this->mailchimp->call( $request, $args );
-
-							$result['data'] = array_merge( $result['data'], $current_page['data'] );
-						}
-
-						break;
-					default:
-						$result = $this->mailchimp->call( $request, $args );
-						break;
-				}
-
-				if( in_array( $request, $this->cachable_requests ) ){
-					$data[ $request ] = $result;
+				// caching results
+				if( 'get' == $method && $cachable ){
+					$data[ $transient_key ] = $result;
 					set_transient( $transient_name, $data, apply_filters( 'yith_wcmc_transient_expiration', DAY_IN_SECONDS ) );
 				}
 
 				return $result;
 			}
+			catch( YITH_WCMC_API_Exception $e ){
+				return array(
+					'status' => false,
+					'code' => $e->getCode(),
+					'message' => $e->getLocalizedMessage()
+				);
+			}
 			catch( Exception $e ){
 				return array(
 					'status' => false,
 					'code' => $e->getCode(),
-					'message' => $this->maybe_translate( $e->getCode(), $e->getMessage() )
+					'message' => $e->getMessage()
 				);
 			}
 		}
+
+		/**
+		 * Delete data in the cache for a specific request
+		 *
+		 * @param $request string
+		 * @return void
+		 *
+		 * @since 2.0.0
+		 */
+		public function delete_cached_data( $request ) {
+			$api_key        = get_option( 'yith_wcmc_mailchimp_api_key' );
+			$transient_name = 'yith_wcmc_' . md5( $api_key );
+			$data           = get_transient( $transient_name );
+
+			if( isset( $data[ $request ] ) ){
+				unset( $data[ $request ] );
+			}
+
+			update_option( '_transient_' . $transient_name, $data );
+		}
+
+		/**
+		 * Return currently registered batch operations
+		 *
+		 * @param $empty_list bool Whether to empty list after read
+		 * @return array Batch operations
+		 *
+		 * @since 2.0.0
+		 */
+		public function get_batch_ops( $empty_list = false ) {
+			$res = $this->batch_ops;
+
+			if($empty_list ){
+				$this->batch_ops = array();
+			}
+
+			return $res;
+		}
+
+		/**
+		 * Perform api call to MailChimp
+		 * When required, iterate to retrieve all items in the set
+		 *
+		 * @param $method string HTTP method to call
+		 * @param $reques string Path to call
+		 * @param $args array Array of additional args to send with API call
+		 * @param $iteration bool Reserved; set to true when iterating to get all page of the set
+		 *
+		 * @throws Exception Throws exception when connection issue occurs
+		 * @throws YITH_WCMC_API_Exception Throws exception when API call fails
+		 * @return array Result set
+		 */
+		protected function _call_rest_api( $method, $request, $args, $iteration = false ){
+			$count = isset( $args['count'] ) ? $args['count'] : 10;
+			$offset = isset( $args['offset'] ) ? $args['offset'] : 0;
+			$manual_pagination = isset( $args['count'] ) || isset( $args['offset'] );
+
+			$timeout = apply_filters( 'yith_wcmc_request_timeout', self::$timeout, $method, $request );
+
+			$result = $this->mailchimp->$method( $request, $args, $timeout );
+
+			// error handling
+			if( empty( $result ) ){
+				throw new Exception( _x( 'Server returned an unexpected response; please, try again later', 'Generic API error message', 'yith-woocommerce-mailchimp' ) );
+			}
+			elseif( isset( $result['status'] ) && is_int( $result['status'] ) && $result['status'] != '200' ){
+				throw new YITH_WCMC_API_Exception( $result['detail'], $result['title'], $result['status'] );
+			}
+
+			// check if iteration is required
+			if( $method == 'get' && ( ! $manual_pagination || $iteration ) && isset( $result['total_items'] ) && $result['total_items'] > ( $offset + $count ) ){
+				$args['count'] = $count;
+				$args['offset'] = $offset + $count;
+
+				$next_page = $this->_call_rest_api( $method, $request, $args, true );
+
+				$path_exploded = explode( '/', $request );
+				$items_index = str_replace( '-', '_', array_pop( $path_exploded ) );
+
+				if( ! isset( $result[ $items_index ] ) || ! isset( $next_page[ $items_index ] ) ){
+					return $result;
+				}
+
+				$result[ $items_index ] = array_merge( $result[ $items_index ], $next_page[ $items_index ] );
+			}
+
+			// our system expect boolean status; error are already handled by exceptions, so we just need to send true
+			if( is_array( $result ) && ( ! isset( $result['status'] ) || $result['status'] == '200' ) ){
+				$result['status'] = true;
+			}
+
+			return $result;
+		}
+
+		/* === AJAX CALLS === */
 
 		/**
 		 * Handles AJAX request, used to call API handles
@@ -373,12 +811,13 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 			}
 
 			// retrieve params for the request
+			$method = isset( $_REQUEST['method'] ) ? trim( $_REQUEST['method'] ) : false;
 			$request = isset( $_REQUEST['request'] ) ? trim( $_REQUEST['request'] ) : false;
 			$args = isset( $_REQUEST['args'] ) ? $_REQUEST['args'] : array();
 			$force_update = isset( $_REQUEST['force_update'] ) ? $_REQUEST['force_update'] : false;
 
 			// return if required params are missing
-			if( empty( $request ) || empty( $_REQUEST['yith_wcmc_ajax_request_nonce'] ) ){
+			if( empty( $method ) || empty( $request ) || empty( $_REQUEST['yith_wcmc_ajax_request_nonce'] ) ){
 				wp_send_json( false );
 			}
 
@@ -388,7 +827,7 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 			}
 
 			// do request
-			$result = $this->do_request( $request, $args, $force_update );
+			$result = $this->do_request( $method, $request, $args, $force_update );
 
 			// send empty response, if there was an error
 			if( isset( $result['status'] ) && ! $result['status'] ){
@@ -400,21 +839,113 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 		}
 
 		/**
-		 * Search for translated error messages; default API response, if no translation is found
+		 * Retrieve lists via ajax call
 		 *
-		 * @param $code string Error code
-		 * @param $default string Error message as returned by MailChimp server
-		 * @return string Translated message or default server response
-		 * @since 1.0.5
+		 * @return void
+		 * @since 1.1.0
 		 */
-		public function maybe_translate( $code, $default ) {
-			$translation = yith_wcmc_include_available_translations();
-
-			if( isset( $translation[ $code ] ) ){
-				return $translation[ $code ];
+		public function retrieve_lists_via_ajax() {
+			if( ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ){
+				wp_send_json( false );
 			}
 
-			return $default;
+			// retrieve params for the request
+			$force_update = isset( $_REQUEST['force_update'] ) ? $_REQUEST['force_update'] : false;
+
+			// return if required params are missing
+			if( empty( $_REQUEST['yith_wcmc_ajax_request_nonce'] ) ){
+				wp_send_json( false );
+			}
+
+			// return if non check fails
+			if( ! wp_verify_nonce( $_REQUEST['yith_wcmc_ajax_request_nonce'], 'yith_wcmc_ajax_request' ) ){
+				wp_send_json( false );
+			}
+
+			// do request
+			$result = $this->retrieve_lists( $force_update );
+
+			// send empty response, if there was an error
+			if( isset( $result['status'] ) && ! $result['status'] ){
+				wp_send_json( false );
+			}
+
+			// return json encoded result
+			wp_send_json( $result );
+		}
+
+		/**
+		 * Retrieve groups via ajax call
+		 *
+		 * @return void
+		 * @since 1.1.0
+		 */
+		public function retrieve_groups_via_ajax() {
+			if( ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ){
+				wp_send_json( false );
+			}
+
+			// retrieve params for the request
+			$list = isset( $_REQUEST['list'] ) ? trim( $_REQUEST['list'] ) : false;
+			$force_update = isset( $_REQUEST['force_update'] ) ? $_REQUEST['force_update'] : false;
+
+			// return if required params are missing
+			if( empty( $list ) || empty( $_REQUEST['yith_wcmc_ajax_request_nonce'] ) ){
+				wp_send_json( false );
+			}
+
+			// return if non check fails
+			if( ! wp_verify_nonce( $_REQUEST['yith_wcmc_ajax_request_nonce'], 'yith_wcmc_ajax_request' ) ){
+				wp_send_json( false );
+			}
+
+			// do request
+			$result = $this->retrieve_groups( $list, $force_update );
+
+			// send empty response, if there was an error
+			if( isset( $result['status'] ) && ! $result['status'] ){
+				wp_send_json( false );
+			}
+
+			// return json encoded result
+			wp_send_json( $result );
+		}
+
+		/**
+		 * Retrieve fields via ajax call
+		 *
+		 * @return void
+		 * @since 1.1.0
+		 */
+		public function retrieve_fields_via_ajax() {
+			if( ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ){
+				wp_send_json( false );
+			}
+
+			// retrieve params for the request
+			$list = isset( $_REQUEST['list'] ) ? trim( $_REQUEST['list'] ) : false;
+			$force_update = isset( $_REQUEST['force_update'] ) ? $_REQUEST['force_update'] : false;
+
+			// return if required params are missing
+			if( empty( $list ) || empty( $_REQUEST['yith_wcmc_ajax_request_nonce'] ) ){
+				wp_send_json( false );
+			}
+
+			// return if non check fails
+			if( ! wp_verify_nonce( $_REQUEST['yith_wcmc_ajax_request_nonce'], 'yith_wcmc_ajax_request' ) ){
+				wp_send_json( false );
+			}
+
+			// do request
+			$result = $this->retrieve_fields( $list, $force_update );
+
+			// send empty response, if there was an error
+			if( isset( $result['status'] ) && ! $result['status'] ){
+				wp_send_json( false );
+			}
+
+			// return json encoded result
+			wp_send_json( $result );
 		}
 
 		/* === ADDS FRONTEND CHECKBOX === */
@@ -569,7 +1100,6 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 			$email_type = get_option( 'yith_wcmc_email_type' );
 			$double_optin = 'yes' == get_option( 'yith_wcmc_double_optin' );
 			$update_existing = 'yes' == get_option( 'yith_wcmc_update_existing' );
-			$send_welcome = 'yes' == get_option( 'yith_wcmc_send_welcome' );
 
 			if( empty( $list_id ) ){
 				return false;
@@ -580,16 +1110,22 @@ if ( ! class_exists( 'YITH_WCMC' ) ) {
 			$last_name = yit_get_prop( $order, 'billing_last_name', true );
 			$user_id = yit_get_prop( $order, 'customer_user', true );
 
+			$merge_fields = new stdClass();
+			$merge_fields->FNAME = $first_name;
+			$merge_fields->LNAME = $last_name;
+
 			$args = array_merge( array(
-				'merge_vars' => apply_filters( 'yith_wcmc_subscribe_merge_vars', array(
-					'FNAME' => $first_name,
-					'LNAME' => $last_name
-				) ),
+				'email_address' => $email,
+				'merge_fields' => apply_filters( 'yith_wcmc_subscribe_merge_vars', $merge_fields ),
 				'email_type' => $email_type,
-				'double_optin' => $double_optin,
-				'update_existing' => $update_existing,
-				'send_welcome' => $send_welcome
+				'status' => $double_optin ? 'pending' : 'subscribed',
+				'update_existing' => $update_existing
 			), $args );
+
+			if( isset( $args['id'] ) ){
+				$list_id = $args['id'];
+				unset( $args['id'] );
+			}
 
 			do_action( 'yith_wcmc_user_subscribing', $order_id );
 

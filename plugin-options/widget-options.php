@@ -107,22 +107,6 @@ return apply_filters( 'yith_wcmc_widget_options', array(
 			'default' => ''
 		),
 
-		'widget-general-replace-interests' => array(
-			'title' => __( 'Replace interests', 'yith-woocommerce-mailchimp' ),
-			'type' => 'checkbox',
-			'id' => 'yith_wcmc_widget_replace_interests',
-			'desc' => __( 'When you check this option, interest group of an already registered user will be replaced with the one selected in the new subscription', 'yith-woocommerce-mailchimp' ),
-			'default' => ''
-		),
-
-		'widget-general-send-welcome' => array(
-			'title' => __( 'Send welcome email', 'yith-woocommerce-mailchimp' ),
-			'type' => 'checkbox',
-			'id' => 'yith_wcmc_widget_send_welcome',
-			'desc' => __( 'Send a welcome email to the user (only available when double opt-in is disabled)', 'yith-woocommerce-mailchimp' ),
-			'default' => ''
-		),
-
 		'widget-general-options-end' => array(
 			'type'  => 'sectionend',
 			'id'    => 'yith_wcmc_widget_options'

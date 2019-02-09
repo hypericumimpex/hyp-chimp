@@ -12,6 +12,7 @@
 			<?php endif; ?>
 
 			<select <?php echo ( ! $removable ) ? 'disabled="disabled"' : '' ?> class="chosen_select" name="<?php echo esc_attr( $id )?>[<?php echo esc_attr( $item_id ) ?>][merge_var]" id="<?php echo esc_attr( $id )?>_<?php echo esc_attr( $item_id ) ?>_merge_var" style="width: 300px;">
+				<option value="EMAIL" <?php selected( $selected_merge_var, 'EMAIL' )?> ><?php _e( 'Email', 'yith-woocommerce-mailchimp' ) ?></option>
 				<?php
 				if ( ! empty( $fields ) ):
 					foreach ( $fields as $field_id => $field_name ):

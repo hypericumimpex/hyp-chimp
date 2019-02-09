@@ -109,14 +109,6 @@ return apply_filters( 'yith_wcmc_checkout_options', array(
 			'default' => ''
 		),
 
-		'checkout-send-welcome' => array(
-			'title' => __( 'Send welcome email', 'yith-woocommerce-mailchimp' ),
-			'type' => 'checkbox',
-			'id' => 'yith_wcmc_send_welcome',
-			'desc' => __( 'Send a welcome email to the user (only available when double opt-in is disabled)', 'yith-woocommerce-mailchimp' ),
-			'default' => ''
-		),
-
 		'checkout-options-end' => array(
 			'type'  => 'sectionend',
 			'id'    => 'yith_wcmc_checkout_options'

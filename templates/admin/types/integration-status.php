@@ -6,13 +6,7 @@
 		<div class="account-banner">
 			<div class="account-avatar">
 				<div class="account-thumb">
-					<?php if( ! empty( $avatar ) ): ?>
-					<img src="<?php echo $avatar ?>" alt="<?php echo $username; ?>" width="96" heigth="96" />
-					<?php
-						else:
-							echo get_avatar( 0, 96 );
-						endif;
-					?>
+					<?php echo get_avatar( $email, 96 );	?>
 				</div>
 				<div class="account-name tips" data-tip="<?php echo ! empty( $username ) ? __( 'MailChimp user', 'yith-woocommerce-mailchimp' ) : __( 'No user can be found with this API key', 'yith-woocommerce-mailchimp' )?>">
 					<?php echo ! empty( $username ) ? $username : __( '&lt; Not Found &gt;' ); ?>

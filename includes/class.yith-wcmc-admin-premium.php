@@ -57,12 +57,13 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		 * @since 1.0.0
 		 */
 		public function __construct() {
-			// register premium options
+		    // register premium options
 			add_filter( 'yith_wcmc_available_admin_tabs', array( $this, 'add_premium_settings_tabs' ) );
 			add_filter( 'yith_wcmc_integration_options', array( $this, 'register_premium_integration_options' ) );
 			add_filter( 'yith_wcmc_checkout_options', array( $this, 'register_premium_checkout_options' ) );
 			add_action( 'woocommerce_admin_field_yith_wcmc_advanced_integration', array( $this, 'print_custom_yith_wcmc_advanced_integration' ) );
 			add_action( 'woocommerce_admin_field_yith_wcmc_custom_fields', array( $this, 'print_custom_yith_wcmc_custom_fields' ) );
+			add_action( 'woocommerce_admin_field_yith_wcmc_store_integration_status', array( $this, 'print_custom_yith_wcmc_store_integration_status' ) );
 			add_action( 'woocommerce_admin_field_date_range', array( $this, 'print_custom_date_range' ) );
 
 			// adds dashboard widget
@@ -74,6 +75,7 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 			add_action( 'wp_ajax_add_advanced_panel_field', array( $this, 'print_advanced_integration_field' ) );
 			add_action( 'wp_ajax_add_advanced_panel_condition', array( $this, 'print_advanced_integration_condition' ) );
 			add_action( 'wp_ajax_add_custom_field', array( $this, 'print_custom_fields_item' ) );
+			add_action( 'wp_ajax_disconnect_store_via_ajax', array( $this, 'disconnect_store_via_ajax' ) );
 
 			// handle exports
 			add_action( 'yit_panel_wc_after_update', array( $this, 'manage_users_export' ) );
@@ -220,6 +222,7 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		 * @since 1.0.0
 		 */
 		public function add_premium_settings_tabs( $tabs ) {
+		    $tabs['store'] = __( 'Store', 'yith-woocommerce-mailchimp' );
 			$tabs['shortcode'] = __( 'Shortcode', 'yith-woocommerce-mailchimp' );
 			$tabs['widget'] = __( 'Widget', 'yith-woocommerce-mailchimp' );
 			$tabs['export'] = __( 'Export', 'yith-woocommerce-mailchimp' );
@@ -237,6 +240,8 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		 * @return array Filtered array of options
 		 */
 		public function register_premium_integration_options( $options ) {
+			$list_options = YITH_WCMC()->retrieve_lists();
+
 			$ecommerce_360 = array(
 				'ecommerce-360-options' => array(
 					'title' => __( 'eCommerce 360', 'yith-woocommerce-mailchimp' ),
@@ -259,6 +264,19 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 					'id' => 'yith_wcmc_ecommerce360_cookie_lifetime',
 					'desc' => __( 'Seconds that have to pass before eCommerce 360 cookies expire', 'yith-woocommerce-mailchimp' ),
 					'default' => WEEK_IN_SECONDS
+				),
+
+				'ecommerce-360-list' => array(
+					'title' => __( 'eCommerce 360 list', 'yith-woocommerce-mailchimp' ),
+					'type' => 'select',
+					'id' => 'yith_wcmc_ecommerce360_list',
+					'desc' => __( 'Select a list for store handling', 'yith-woocommerce-mailchimp' ),
+					'options' => $list_options,
+					'custom_attributes' => empty( $list_options ) ? array(
+						'disabled' => 'disabled'
+					) : array(),
+					'css' => 'min-width:300px;',
+					'class' => 'list-select'
 				),
 
 				'ecommerce-360-options-end' => array(
@@ -286,22 +304,6 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 			$selected_list = get_option( 'yith_wcmc_mailchimp_list' );
 			$groups_options = ( ! empty( $selected_list ) ) ? YITH_WCMC()->retrieve_groups( $selected_list ) : array();
 
-			$replace_interests = array(
-				'title' => __( 'Replace interests', 'yith-woocommerce-mailchimp' ),
-				'type' => 'checkbox',
-				'id' => 'yith_wcmc_replace_interests',
-				'desc' => __( 'When you check this option, interest group of an already registered user will be replaced by the one selected in the new subscription', 'yith-woocommerce-mailchimp' ),
-				'default' => ''
-			);
-
-			$options['checkout'] = array_merge(
-				array_slice( $options['checkout'], 0, 9 ),
-				array(
-					'checkout-replace-interests' => $replace_interests
-				),
-				array_slice( $options['checkout'], 9, count( $options['checkout'] ) )
-			);
-
 			$mode_option = array(
 				'title' => __( 'Integration mode', 'yith-woocommerce-mailchimp' ),
 				'type' => 'select',
@@ -314,11 +316,11 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 			);
 
 			$options['checkout'] = array_merge(
-				array_slice( $options['checkout'], 0, 13 ),
+				array_slice( $options['checkout'], 0, 11 ),
 				array(
 					'checkout-mode' => $mode_option
 				),
-				array_slice( $options['checkout'], 13, count( $options['checkout'] ) )
+				array_slice( $options['checkout'], 11, count( $options['checkout'] ) )
 			);
 
 			$group_option = array(
@@ -347,9 +349,9 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 			);
 
 			$options['checkout'] = array_merge(
-				array_slice( $options['checkout'], 0, 15 ),
+				array_slice( $options['checkout'], 0, 13 ),
 				$advanced_options,
-				array_slice( $options['checkout'], 15, count( $options['checkout'] ) )
+				array_slice( $options['checkout'], 13, count( $options['checkout'] ) )
 			);
 
 			return $options;
@@ -594,6 +596,19 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		}
 
 		/**
+		 * Print "yith_wcmc_store_integration_status" custom field
+         *
+         * @param $value mixed Args
+         * @return void
+		 */
+		public function print_custom_yith_wcmc_store_integration_status( $value ) {
+            $store_info = YITH_WCMC_Store()->get_store_info();
+            $lists = YITH_WCMC_Premium()->retrieve_lists();
+
+			include( YITH_WCMC_DIR . 'templates/admin/types/store-integration-status.php' );
+		}
+
+		/**
 		 * Print date range type
 		 *
 		 * @param $value array Array of options used to print field
@@ -646,6 +661,7 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		 */
 		public function manage_users_export(){
 			if( isset( $_POST['export_users'] ) && isset( $_POST['yith_wcmc_export_list'] ) ){
+				$list_id = $_POST['yith_wcmc_export_list'];
 				$email_type = isset( $_POST['yith_wcmc_export_email_type'] ) ? $_POST['yith_wcmc_export_email_type'] : 'html';
 				$double_optin = isset( $_POST['yith_wcmc_export_double_optin'] );
 				$update_existing = isset( $_POST['yith_wcmc_export_update_existing'] );
@@ -663,32 +679,34 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 
 				if( ! empty( $users ) ){
 					foreach( $users as $user ) {
+						$member_hash = md5( strtolower( $user['user_email'] ) );
+
 						$batch[] = array(
-							'email'      => array(
-								'email' => $user['user_email']
-							),
-							'email_type' => $email_type,
-							'merge_vars' => array_merge(
-								array(
-									'FNAME' => $user['user_first_name'],
-									'LNAME' => $user['user_last_name']
-								),
-								( $waiting_products_field && ! empty( $user['waiting_products'] ) ) ? array(
-									$waiting_products_field => $user['waiting_products']
-								) : array()
-							)
+							'method' => $update_existing ? 'PUT' : 'POST',
+							'path' => $update_existing ? "lists/{$list_id}/members/{$member_hash}" : "lists/{$list_id}/members",
+							'body' => json_encode( array(
+								'email_address' => $user['user_email'],
+								'email_type' => $email_type,
+								'status' => $double_optin ? 'pending' : 'subscribed',
+								'merge_fields' => array_merge(
+									array(
+										'FNAME' => $user['user_first_name'],
+										'LNAME' => $user['user_last_name']
+									),
+									( $waiting_products_field && ! empty( $user['waiting_products'] ) ) ? array(
+										$waiting_products_field => $user['waiting_products']
+									) : array()
+								)
+							) )
 						);
 					}
 				}
 
-				$res = YITH_WCMC()->do_request( 'lists/batch-subscribe', array(
-					'id' => $_POST['yith_wcmc_export_list'],
-					'batch' => $batch,
-					'double_optin' => $double_optin,
-					'update_existing' => $update_existing
+				$res = YITH_WCMC()->do_request( 'post', 'batches', array(
+					'operations' => $batch
 				) );
 
-				wp_redirect( esc_url_raw( add_query_arg( array( 'add_count' => $res['add_count'], 'update_count' => $res['update_count'], 'error_count' => $res['error_count'] ) ) ) );
+				wp_redirect( esc_url_raw( add_query_arg( array( 'batch_submitted' => isset( $res['status'] ) && in_array( $res['status'], array( 'pending', 'started', 'finished' ) ) ) ) ) );
 				die();
 			}
 		}
@@ -751,21 +769,20 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		 * @since 1.0.0
 		 */
 		public function print_notice_after_export() {
-			if( isset( $_GET['add_count'] ) || isset( $_GET['update_count'] ) || isset( $_GET['error_count'] ) ){
-				$class = ( isset( $_GET['error_count'] ) && $_GET['error_count'] > 0 ) ? 'error' : 'updated';
+			if( isset( $_GET['batch_submitted'] ) ){
+				$class = ( $_GET['batch_submitted'] ) ? 'updated' : 'error';
 				?>
 				<div class="<?php echo $class ?>">
+					<p>
 					<?php
-					if( isset( $_GET['add_count'] ) ){
-						echo '<p><b>' . __( 'Email added: ', 'yith-woocommerce-mailchimp' ) . '</b>' . $_GET['add_count'] . '</p>';
+					if( $_GET['batch_submitted'] ) {
+						_e( 'Batch request was correctly sent to MailChimp Servers; it will be processed as soon as possible', 'yith-woocommerce-mailchimp' );
 					}
-					if( isset( $_GET['update_count'] ) ){
-						echo '<p><b>' . __( 'Email updated: ', 'yith-woocommerce-mailchimp' ) . '</b>' . $_GET['update_count'] . '</p>';
-					}
-					if( isset( $_GET['error_count'] ) ){
-						echo '<p><b>' . __( 'Error encountered: ', 'yith-woocommerce-mailchimp' ) . '</b>' . $_GET['error_count'] . '</p>';
+					else{
+						_e( 'There was an error with your batch request; please, try later', 'yith-woocommerce-mailchimp' );
 					}
 					?>
+					</p>
 				</div>
 			<?php
 			}
@@ -990,7 +1007,7 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		 */
 		public function refresh_lists_for_widget() {
 			if( isset( $_GET['refresh_lists_nonce'] ) && wp_verify_nonce( $_GET['refresh_lists_nonce'], 'refresh_lists_action' ) ){
-				YITH_WCMC()->do_request( 'lists/list', array(), true );
+				YITH_WCMC()->do_request( 'get', 'lists', array(), true );
 
 				wp_redirect( esc_url_raw( remove_query_arg( 'refresh_lists_nonce' ) ) );
 			}
@@ -1015,14 +1032,14 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 		 * @since 1.0.0
 		 */
 		public function print_dashboard_widget() {
-			$profile = YITH_WCMC()->do_request( 'users/profile' );
-			$user_id = isset( $profile['id'] ) ? $profile['id'] : false;
-			$username = isset( $profile['username'] ) ? $profile['username'] : false;
-			$name = isset( $profile['name'] ) ? $profile['name'] : false;
-			$email = isset( $profile['email'] ) ? $profile['email'] : false;
-			$avatar = isset( $profile['avatar'] ) ? $profile['avatar'] : false;
+			$profile = YITH_WCMC()->do_request( 'get' );
 
-			$lists = YITH_WCMC()->do_request( 'lists/list' );
+			$user_id = isset( $profile['account_id'] ) ? $profile['account_id'] : false;
+			$username = isset( $profile['username'] ) ? $profile['username'] : false;
+			$name = isset( $profile['account_name'] ) ? $profile['account_name'] : false;
+			$email = isset( $profile['email'] ) ? $profile['email'] : false;
+
+			$lists = YITH_WCMC()->do_request( 'get', 'lists' );
 
 			include( YITH_WCMC_DIR . 'templates/admin/mailchimp-dashboard-widget.php' );
 		}
@@ -1085,6 +1102,36 @@ if ( ! class_exists( 'YITH_WCMC_Admin_Premium' ) ) {
 					icl_register_string( 'admin_texts_plugin_yith-woocommerce-mailchimp-premium', 'yith_wcmc_shortcode_custom_fields[' . $field['merge_var'] . ']', $field['name'] );
 				}
 			}
+		}
+
+		/* === AJAX CALLS === */
+
+		/**
+		 * Disconnect store via ajax call
+		 *
+		 * @return void
+		 * @since 1.1.0
+		 */
+		public function disconnect_store_via_ajax() {
+			if( ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ){
+				wp_send_json( false );
+			}
+
+			// return if required params are missing
+			if( empty( $_REQUEST['yith_wcmc_ajax_request_nonce'] ) ){
+				wp_send_json( false );
+			}
+
+			// return if non check fails
+			if( ! wp_verify_nonce( $_REQUEST['yith_wcmc_ajax_request_nonce'], 'yith_wcmc_ajax_request' ) ){
+				wp_send_json( false );
+			}
+
+			// do request
+			$result = YITH_WCMC_Store()->maybe_disconnect_store();
+
+			// return json encoded result
+			wp_send_json( $result );
 		}
 	}
 }

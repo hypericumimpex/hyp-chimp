@@ -8,4 +8,4 @@
  */
 ?>
 
-<input type="url" name="<?php echo esc_attr( $mailchimp_data['tag'] ) ?>" id="<?php echo esc_attr( $mailchimp_data['tag'] ) ?>_<?php echo esc_attr( $id ) ?>" value="<?php echo isset( $_REQUEST[ $mailchimp_data['tag'] ] ) ? $_REQUEST[ $mailchimp_data['tag'] ] : '' ?>"<?php echo ( $mailchimp_data['req'] ) ? 'required="required"' : '' ?> placeholder="<?php echo $placeholder ?>" />
+<input type="url" name="<?php echo esc_attr( $mailchimp_data['tag'] ) ?>" id="<?php echo esc_attr( $mailchimp_data['tag'] ) ?>_<?php echo esc_attr( $id ) ?>" value="<?php echo isset( $_REQUEST[ $mailchimp_data['tag'] ] ) ? $_REQUEST[ $mailchimp_data['tag'] ] : '' ?>"<?php echo ( $mailchimp_data['required'] ) ? 'required="required"' : '' ?> placeholder="<?php echo $placeholder ?>" />

@@ -1,131 +1,137 @@
 # Copyright (C) 2018 YITH WooCommerce Mailchimp Premium
 # This file is distributed under the same license as the YITH WooCommerce Mailchimp Premium package.
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: YITH WooCommerce Mailchimp Premium 1.1.5\n"
+"Project-Id-Version: YITH WooCommerce Mailchimp\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/init\n"
-"POT-Creation-Date: 2018-10-24 16:40:49+00:00\n"
+"POT-Creation-Date: 2019-02-07 16:48+0100\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2018-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: plugins@yithemes.com\n"
+"X-Generator: Poedit 2.2\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;__ngettext:1,2;__ngettext_noop:1,2;"
+"_n_noop:.1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: plugin-fw\n"
 
-#: includes/class.yith-wcmc-admin-premium.php:206
+#: includes/class.yith-wcmc-admin-premium.php:208
 msgid "Export Users"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:207
+#: includes/class.yith-wcmc-admin-premium.php:209
 #: plugin-options/export-options.php:186
 msgid "Download CSV"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:223
+#: includes/class.yith-wcmc-admin-premium.php:225
+msgid "Store"
+msgstr ""
+
+#: includes/class.yith-wcmc-admin-premium.php:226
 msgid "Shortcode"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:224
+#: includes/class.yith-wcmc-admin-premium.php:227
 msgid "Widget"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:225
+#: includes/class.yith-wcmc-admin-premium.php:228
 #: plugin-options/export-options.php:40
 msgid "Export"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:242
+#: includes/class.yith-wcmc-admin-premium.php:247
 msgid "eCommerce 360"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:249
+#: includes/class.yith-wcmc-admin-premium.php:254
 msgid "Enable eCommerce 360 integration"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:252
+#: includes/class.yith-wcmc-admin-premium.php:257
 msgid ""
 "When you check this option, data of the orders made by users coming from a "
 "campaign will be collected and sent to MailChimp servers, for segmentation "
 "purpose"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:257
+#: includes/class.yith-wcmc-admin-premium.php:262
 msgid "eCommerce 360 cookie lifetime"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:260
+#: includes/class.yith-wcmc-admin-premium.php:265
 msgid "Seconds that have to pass before eCommerce 360 cookies expire"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:290
-#: plugin-options/shortcode-options.php:111
-#: plugin-options/widget-options.php:111
-msgid "Replace interests"
+#: includes/class.yith-wcmc-admin-premium.php:270
+msgid "eCommerce 360 list"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:293
-msgid ""
-"When you check this option, interest group of an already registered user "
-"will be replaced by the one selected in the new subscription"
-msgstr ""
-
-#: includes/class.yith-wcmc-admin-premium.php:306
-msgid "Integration mode"
+#: includes/class.yith-wcmc-admin-premium.php:273
+msgid "Select a list for store handling"
 msgstr ""
 
 #: includes/class.yith-wcmc-admin-premium.php:308
+msgid "Integration mode"
+msgstr ""
+
+#: includes/class.yith-wcmc-admin-premium.php:310
 msgid ""
 "Select whether to use a basic set of options or add integration settings"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:311
+#: includes/class.yith-wcmc-admin-premium.php:313
 msgid "Simple"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:312
+#: includes/class.yith-wcmc-admin-premium.php:314
 msgid "Advanced"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:325
+#: includes/class.yith-wcmc-admin-premium.php:327
 #: templates/admin/types/advanced-integration-item.php:30
 msgid "Interest groups"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:327
+#: includes/class.yith-wcmc-admin-premium.php:329
 msgid "Select an interest group for the new user"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:338
+#: includes/class.yith-wcmc-admin-premium.php:340
 msgid "Advanced options"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:484
+#: includes/class.yith-wcmc-admin-premium.php:486
 msgid "Shipping method name"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:485
+#: includes/class.yith-wcmc-admin-premium.php:487
 msgid "Payment method name"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:486
+#: includes/class.yith-wcmc-admin-premium.php:488
 msgid "User ID"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:496
+#: includes/class.yith-wcmc-admin-premium.php:498
 #: templates/admin/types/advanced-integration-condition.php:9
 msgid "Custom"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:760
-msgid "Email added: "
+#: includes/class.yith-wcmc-admin-premium.php:779
+msgid ""
+"Batch request was correctly sent to MailChimp Servers; it will be processed "
+"as soon as possible"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin-premium.php:763
-msgid "Email updated: "
-msgstr ""
-
-#: includes/class.yith-wcmc-admin-premium.php:766
-msgid "Error encountered: "
+#: includes/class.yith-wcmc-admin-premium.php:782
+msgid "There was an error with your batch request; please, try later"
 msgstr ""
 
 #: includes/class.yith-wcmc-admin.php:86
@@ -154,34 +160,277 @@ msgstr ""
 msgid "Update Fields"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin.php:161
-#: includes/class.yith-wcmc-admin.php:162
+#: includes/class.yith-wcmc-admin.php:142
+msgid "Connect Store"
+msgstr ""
+
+#: includes/class.yith-wcmc-admin.php:143
+msgid ""
+"Are you sure you want to disconnect your store?\n"
+"\n"
+"This will delete all store data from your Mailchimp account, including "
+"Products, Coupons, Orders and Customers"
+msgstr ""
+
+#: includes/class.yith-wcmc-admin.php:168
+#: includes/class.yith-wcmc-admin.php:169
 msgid "Mailchimp"
 msgstr ""
 
-#: includes/class.yith-wcmc-admin.php:220
+#: includes/class.yith-wcmc-admin.php:226
 msgid "Mailchimp status"
 msgstr ""
 
-#: includes/class.yith-wcmc-premium.php:789 includes/class.yith-wcmc.php:466
+#: includes/class.yith-wcmc-api-exception.php:58
+msgid "Your request could not be processed."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:59
+msgid "The action requested was not valid for this resource."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:60
+msgid "The resource submitted could not be validated."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:61
+msgid "We encountered an unspecified JSON parsing error."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:62
+msgid "Your request did not include an API key."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:63
+msgid ""
+"Your API key may be invalid, or you’ve attempted to access the wrong data "
+"center."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:64
+msgid "You are not permitted to access this resource."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:65
+msgid "This account has been disabled."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:66
+msgid "The API key provided is linked to a different data center."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:67
+msgid "The requested resource could not be found."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:68
+msgid ""
+"The requested method and resource are not compatible. See the Allow header "
+"for this resource’s available methods."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:69
+msgid "The sub-resource requested is nested too deeply."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:70
+msgid ""
+"You can only use the X-HTTP-Method-Override header with the POST method."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:71
+msgid "The fields requested from this resource are invalid."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:72
+msgid "You have exceeded the limit of 10 simultaneous connections."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:73
+msgid ""
+"An unexpected internal error has occurred. Please contact Support for more "
+"information."
+msgstr ""
+
+#: includes/class.yith-wcmc-api-exception.php:74
+msgid "This method has been disabled."
+msgstr ""
+
+#: includes/class.yith-wcmc-background-process.php:128
+#, php-format
+msgctxt "log message"
+msgid "Task completed: %s %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:851 includes/class.yith-wcmc.php:997
 msgid "Privacy Policy"
 msgstr ""
 
-#: includes/class.yith-wcmc-premium.php:1004
+#: includes/class.yith-wcmc-premium.php:1072
+msgctxt "[gutenberg]: block name"
+msgid "YITH MailChimp Subscription Form"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1073
+msgctxt "[gutenberg]: block description"
+msgid "Show form to subscribe to your MailChimp list"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1078
+#: plugin-options/shortcode-options.php:31 plugin-options/widget-options.php:31
+msgid "Form title"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1083
+#: plugin-options/shortcode-options.php:40 plugin-options/widget-options.php:40
+msgid "\"Submit\" button label"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1088
+#: plugin-options/shortcode-options.php:49 plugin-options/widget-options.php:49
+msgid "\"Successfully Registered\" message"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1093
+#: plugin-options/shortcode-options.php:58 plugin-options/widget-options.php:58
+msgid "Show privacy checkbox"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1095
+msgid "Hide privacy field"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1096
+msgid "Show login form"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1102
+#: plugin-options/shortcode-options.php:66 plugin-options/widget-options.php:66
+msgid "Privacy field label"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1107
+msgid "Hide form after registration\t"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1109
+msgid "Do not hide form after registration"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1110
+#: plugin-options/shortcode-options.php:75 plugin-options/widget-options.php:75
+msgid "Hide form after registration"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1116
+#: plugin-options/checkout-options.php:85 plugin-options/export-options.php:60
+#: plugin-options/shortcode-options.php:83 plugin-options/widget-options.php:83
+msgid "Email type"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1118
+#: plugin-options/checkout-options.php:90 plugin-options/export-options.php:65
+#: plugin-options/shortcode-options.php:88 plugin-options/widget-options.php:88
+msgid "HTML"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1119
+#: plugin-options/checkout-options.php:91 plugin-options/export-options.php:66
+#: plugin-options/shortcode-options.php:89 plugin-options/widget-options.php:89
+msgid "Text"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1125
+msgid "Double Opt-in\t"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1127
+msgid "Disable double opt-in"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1128
+msgid "Enable double opt-in"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1134
+#: includes/class.yith-wcmc-premium.php:1137
+#: plugin-options/checkout-options.php:105 plugin-options/export-options.php:80
+#: plugin-options/shortcode-options.php:103
+#: plugin-options/widget-options.php:103
+msgid "Update existing"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1136
+msgid "Do not update existing"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1143
+#: plugin-options/checkout-options.php:125 plugin-options/export-options.php:47
+#: plugin-options/shortcode-options.php:123
+#: plugin-options/widget-options.php:123
+#: templates/admin/types/advanced-integration-item.php:14
+msgid "MailChimp list"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1149
+msgid ""
+"Auto-subscribe interest groups (list of GROUP_ID-INTEREST_ID separated by "
+"special token #%,%#)"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1154
+msgid ""
+"Show the following interest groups (list of GROUP_ID-INTEREST_ID separated "
+"by special token #%,%#)"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1159
+msgid "Fields (list of LABEL,MERGE_VAR separated by special token |)"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1164
+msgid "Enable custom CSS\t"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1166
+msgid "Do not enable custom style"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1167
+msgid "Enable custom style"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1173
+msgid ""
+"Round Corners for \"Subscribe\" Button\t (only when custom style enabled)"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1175
+msgid "Do not round corners"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1176
+msgid "Round Corners"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1206
+msgid "Custom CSS (only when custom style enabled)"
+msgstr ""
+
+#: includes/class.yith-wcmc-premium.php:1248
 msgid "Required arguments missing"
 msgstr ""
 
-#: includes/class.yith-wcmc-premium.php:1012
+#: includes/class.yith-wcmc-premium.php:1256
 msgid "You must agree privacy agreement"
 msgstr ""
 
-#: includes/class.yith-wcmc-premium.php:1021
+#: includes/class.yith-wcmc-premium.php:1265
 msgid "Ops! It seems you are not allowed to do this"
 msgstr ""
 
-#: includes/class.yith-wcmc-premium.php:1032
-#: plugin-options/shortcode-options.php:53
-#: plugin-options/widget-options.php:53
+#: includes/class.yith-wcmc-premium.php:1275
+#: plugin-options/shortcode-options.php:53 plugin-options/widget-options.php:53
 msgid "Great! You're now subscribed to our newsletter"
 msgstr ""
 
@@ -286,11 +535,225 @@ msgid "Mailchimp Subscribed Lists"
 msgstr ""
 
 #: includes/class.yith-wcmc-privacy.php:137
+#, php-format
 msgid "User unsubscribed from %d lists."
 msgstr ""
 
 #: includes/class.yith-wcmc-privacy.php:152
 msgid "Mailchimp Data"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:106
+#, php-format
+msgid "Every %d Minutes"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:303
+msgctxt "log message"
+msgid "Attempting to connect store"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:331
+msgctxt "log message"
+msgid "Store connected!"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:344
+msgctxt "log message"
+msgid "Attempting to disconnect store"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:359
+msgctxt "log message"
+msgid "Store disconnected!"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:386
+msgid ""
+"Your store is currently being synced! This may take a while, but won't "
+"affect performance of your store. You can keep track of the status of the "
+"operation in this page"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:405
+#, php-format
+msgid ""
+"Current synchronization status: <b>Products:</b> %s/%s (%s%%) | <b>Coupons:</"
+"b> %s/%s (%s%%) | <b>Orders:</b> %s/%s (%s%%)"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:431
+#, php-format
+msgctxt "log message"
+msgid "Attempting sync action: %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:451
+#, php-format
+msgctxt "log message"
+msgid "Sync action performed: %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:511
+#: includes/class.yith-wcmc-store.php:618
+#, php-format
+msgctxt "log message"
+msgid "New sync step: %s\n"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:517
+msgctxt "log message"
+msgid "Sync completed!"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:843
+#, php-format
+msgctxt "log message"
+msgid "Attempting to process order %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:996
+#, php-format
+msgctxt "log message"
+msgid "Order %s skipped"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1012
+#, php-format
+msgctxt "log message"
+msgid "Order %s processed"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1037
+#, php-format
+msgctxt "log message"
+msgid "Attempting to delete order %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1055
+#, php-format
+msgctxt "log message"
+msgid "Order %s deleted"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1080
+#, php-format
+msgctxt "log message"
+msgid "Attempting to process product %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1160
+#, php-format
+msgctxt "log message"
+msgid "Product %s skipped"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1169
+#, php-format
+msgctxt "log message"
+msgid "Product %s processed"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1194
+#, php-format
+msgctxt "log message"
+msgid "Attempting to delete product %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1213
+#, php-format
+msgctxt "log message"
+msgid "Product %s deleted"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1245
+#, php-format
+msgctxt "log message"
+msgid "Attempting to process variant %s (%s)"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1270
+#, php-format
+msgctxt "log message"
+msgid "Variant %s (%s) skipped"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1279
+#, php-format
+msgctxt "log message"
+msgid "Variant %s (%s) processed"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1311
+#, php-format
+msgctxt "log message"
+msgid "Attempting to delete variant %s (%s)"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1329
+#, php-format
+msgctxt "log message"
+msgid "Variant %s (%s) deleted"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1354
+#, php-format
+msgctxt "log message"
+msgid "Attempting to process promo code %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1415
+#, php-format
+msgctxt "log message"
+msgid "Promo code %s skipped"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1426
+#, php-format
+msgctxt "log message"
+msgid "Promo code %s processed"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1451
+#, php-format
+msgctxt "log message"
+msgid "Attempting to delete promo code %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1466
+#, php-format
+msgctxt "log message"
+msgid "Promo code %s deleted"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1499
+#, php-format
+msgctxt "log message"
+msgid "Attempting to process cart for customer %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1584
+#, php-format
+msgctxt "log message"
+msgid "Cart for customer %s skipped"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1593
+#, php-format
+msgctxt "log message"
+msgid "Cart for customer %s processed"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1618
+#, php-format
+msgctxt "log message"
+msgid "Attempting to delete cart for customer %s"
+msgstr ""
+
+#: includes/class.yith-wcmc-store.php:1627
+#, php-format
+msgctxt "log message"
+msgid "Cart for customer %s deleted"
 msgstr ""
 
 #: includes/class.yith-wcmc-widget.php:31
@@ -302,94 +765,48 @@ msgid "YITH Mailchimp Subscription Form"
 msgstr ""
 
 #: includes/class.yith-wcmc-widget.php:47
+#, php-format
 msgid ""
 "You can customize options for <b>Mailchimp Subscription Form</b> widget from "
 "YITH WooCommerce Mailchimp <a href=\"%s\">admin page</a>"
 msgstr ""
 
-#: includes/class.yith-wcmc.php:599
+#: includes/class.yith-wcmc.php:546
+msgctxt "Default email field name (backend)"
+msgid "Email Address"
+msgstr ""
+
+#: includes/class.yith-wcmc.php:768
+msgctxt "Generic API error message"
+msgid "Server returned an unexpected response; please, try again later"
+msgstr ""
+
+#: includes/class.yith-wcmc.php:1135
+#, php-format
 msgid "MAILCHIMP ERROR: (%s) %s"
 msgstr ""
 
-#: includes/class.yith-wcmc.php:608
+#: includes/class.yith-wcmc.php:1144
 msgid "First name"
 msgstr ""
 
-#: includes/class.yith-wcmc.php:609
+#: includes/class.yith-wcmc.php:1145
 msgid "Last name"
 msgstr ""
 
-#: includes/class.yith-wcmc.php:610
+#: includes/class.yith-wcmc.php:1146
+#: templates/admin/types/custom-fields-item.php:15
 msgid "Email"
 msgstr ""
 
-#: includes/functions.yith-wcmc.php:18
-msgctxt "Mailchimp error translation (-50)"
-msgid "You have made too many connections on the MailChimp server."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:19
-msgctxt "MailChimp error translation (101)"
-msgid ""
-"You cannot use your APIs, because your user profile has been deactivated."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:20
-msgctxt "MailChimp error translation (104)"
-msgid ""
-"Your API key may be invalid, or you've attempted to access the wrong "
-"datacenter."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:21
-msgctxt "MailChimp error translation (105)"
-msgid ""
-"You cannot use your APIs, because your user profile is under maintenance."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:22
-msgctxt "MailChimp error translation (109)"
-msgid ""
-"You cannot complete your operation, because you don't have the necessary "
-"authorization."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:23
-msgctxt "MailChimp error translation (120)"
-msgid "You have requested an invalid operation."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:24
-msgctxt "MailChimp error translation (232)"
-msgid "The email you have written is not valid, please try to write it again."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:25
-msgctxt "MailChimp error translation (500)"
-msgid "The sent information are not valid, please double check them."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:28
-msgctxt "MailChimp error translation (-99)"
-msgid "You submitted an invalid email address that cannot be imported."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:29
-msgctxt "MailChimp error translation (200)"
-msgid "Invalid MailChimp List ID."
-msgstr ""
-
-#: includes/functions.yith-wcmc.php:30
-msgctxt "MailChimp error translation (214)"
-msgid "You submitted an email address that is already subscribed to the list."
-msgstr ""
-
-#: init.php:145
+#: init.php:158
+#, php-format
 msgid ""
 "%s is enabled but not effective. It requires WooCommerce in order to work."
 msgstr ""
 
-#: init.php:155
+#: init.php:168
+#, php-format
 msgid ""
 "You can't activate the free version of %s while you are using the premium "
 "one."
@@ -495,89 +912,38 @@ msgid ""
 "printed as already checked"
 msgstr ""
 
-#: plugin-options/checkout-options.php:85 plugin-options/export-options.php:60
-#: plugin-options/shortcode-options.php:83
-#: plugin-options/widget-options.php:83
-msgid "Email type"
-msgstr ""
-
 #: plugin-options/checkout-options.php:88
 msgid "User's preferential email type (HTML or plain text)"
 msgstr ""
 
-#: plugin-options/checkout-options.php:90 plugin-options/export-options.php:65
-#: plugin-options/shortcode-options.php:88
-#: plugin-options/widget-options.php:88
-msgid "HTML"
-msgstr ""
-
-#: plugin-options/checkout-options.php:91 plugin-options/export-options.php:66
-#: plugin-options/shortcode-options.php:89
-#: plugin-options/widget-options.php:89
-msgid "Text"
-msgstr ""
-
 #: plugin-options/checkout-options.php:97 plugin-options/export-options.php:72
-#: plugin-options/shortcode-options.php:95
-#: plugin-options/widget-options.php:95
+#: plugin-options/shortcode-options.php:95 plugin-options/widget-options.php:95
 msgid "Double Opt-in"
 msgstr ""
 
-#: plugin-options/checkout-options.php:100
-#: plugin-options/export-options.php:75
-#: plugin-options/shortcode-options.php:98
-#: plugin-options/widget-options.php:98
+#: plugin-options/checkout-options.php:100 plugin-options/export-options.php:75
+#: plugin-options/shortcode-options.php:98 plugin-options/widget-options.php:98
 msgid ""
 "When you check this option, MailChimp will send a confirmation email before "
 "adding the user to the list"
 msgstr ""
 
-#: plugin-options/checkout-options.php:105
-#: plugin-options/export-options.php:80
-#: plugin-options/shortcode-options.php:103
-#: plugin-options/widget-options.php:103
-msgid "Update existing"
-msgstr ""
-
-#: plugin-options/checkout-options.php:108
-#: plugin-options/export-options.php:83 plugin-options/widget-options.php:106
+#: plugin-options/checkout-options.php:108 plugin-options/export-options.php:83
+#: plugin-options/widget-options.php:106
 msgid ""
 "When you check this option, existing users will be updated and MailChimp "
 "servers will not show errors"
 msgstr ""
 
-#: plugin-options/checkout-options.php:113
-#: plugin-options/shortcode-options.php:119
-#: plugin-options/widget-options.php:119
-msgid "Send welcome email"
-msgstr ""
-
-#: plugin-options/checkout-options.php:116
-#: plugin-options/shortcode-options.php:122
-#: plugin-options/widget-options.php:122
-msgid ""
-"Send a welcome email to the user (only available when double opt-in is "
-"disabled)"
-msgstr ""
-
-#: plugin-options/checkout-options.php:126
-#: plugin-options/shortcode-options.php:132
-#: plugin-options/widget-options.php:132
+#: plugin-options/checkout-options.php:118
+#: plugin-options/shortcode-options.php:116
+#: plugin-options/widget-options.php:116
 msgid "List Options"
 msgstr ""
 
-#: plugin-options/checkout-options.php:133
-#: plugin-options/export-options.php:47
-#: plugin-options/shortcode-options.php:139
-#: plugin-options/widget-options.php:139
-#: templates/admin/types/advanced-integration-item.php:14
-msgid "MailChimp list"
-msgstr ""
-
-#: plugin-options/checkout-options.php:135
-#: plugin-options/export-options.php:49
-#: plugin-options/shortcode-options.php:141
-#: plugin-options/widget-options.php:141
+#: plugin-options/checkout-options.php:127 plugin-options/export-options.php:49
+#: plugin-options/shortcode-options.php:125
+#: plugin-options/widget-options.php:125
 #: templates/admin/types/advanced-integration-item.php:25
 msgid "Select a list for the new user"
 msgstr ""
@@ -586,8 +952,7 @@ msgstr ""
 msgid "Export a set of users from your store to one of your MailChimp lists"
 msgstr ""
 
-#: plugin-options/export-options.php:63
-#: plugin-options/shortcode-options.php:86
+#: plugin-options/export-options.php:63 plugin-options/shortcode-options.php:86
 #: plugin-options/widget-options.php:86
 msgid "User preferential email type (HTML or plain text)"
 msgstr ""
@@ -763,6 +1128,7 @@ msgid ""
 msgstr ""
 
 #: plugin-options/integration-options.php:55
+#: plugin-options/store-options.php:33
 msgid "Integration status"
 msgstr ""
 
@@ -776,84 +1142,45 @@ msgid ""
 "print a subscription form; set here the options for your form"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:31
-#: plugin-options/widget-options.php:31
-msgid "Form title"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:34
-#: plugin-options/widget-options.php:34
+#: plugin-options/shortcode-options.php:34 plugin-options/widget-options.php:34
 msgid "Select a title for the newsletter subscription form"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:35
-#: plugin-options/widget-options.php:35
+#: plugin-options/shortcode-options.php:35 plugin-options/widget-options.php:35
 msgid "Newsletter"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:40
-#: plugin-options/widget-options.php:40
-msgid "\"Submit\" button label"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:43
-#: plugin-options/widget-options.php:43
+#: plugin-options/shortcode-options.php:43 plugin-options/widget-options.php:43
 msgid "Select a label for the \"Submit\" button found in the form"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:44
-#: plugin-options/widget-options.php:44
+#: plugin-options/shortcode-options.php:44 plugin-options/widget-options.php:44
 msgid "SUBMIT"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:49
-#: plugin-options/widget-options.php:49
-msgid "\"Successfully Registered\" message"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:52
-#: plugin-options/widget-options.php:52
+#: plugin-options/shortcode-options.php:52 plugin-options/widget-options.php:52
 msgid ""
 "Select a message to display to users when registration has been completed "
 "successfully"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:58
-#: plugin-options/widget-options.php:58
-msgid "Show privacy checkbox"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:61
-#: plugin-options/widget-options.php:61
+#: plugin-options/shortcode-options.php:61 plugin-options/widget-options.php:61
 msgid ""
 "Show checkbox to obtain explicit consent to collect personal data (Requested "
 "by GDPR regulations)"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:66
-#: plugin-options/widget-options.php:66
-msgid "Privacy field label"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:69
-#: plugin-options/widget-options.php:69
+#: plugin-options/shortcode-options.php:69 plugin-options/widget-options.php:69
 msgid ""
 "Label that describes privacy checkbox. Use <code>%privacy_policy%</code> to "
 "add a link to your store privacy policy page"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:70
-#: plugin-options/widget-options.php:70
+#: plugin-options/shortcode-options.php:70 plugin-options/widget-options.php:70
 msgid "Please, make sure to read and accept our %privacy_policy%"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:75
-#: plugin-options/widget-options.php:75
-msgid "Hide form after registration"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:78
-#: plugin-options/widget-options.php:78
+#: plugin-options/shortcode-options.php:78 plugin-options/widget-options.php:78
 msgid ""
 "When you select this option, the registration form will be hidden after a "
 "successful registration"
@@ -865,104 +1192,223 @@ msgid ""
 "servers will not show errors"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:114
-msgid ""
-"When you check this option, interest group of an already registered user "
-"will be replaced with the one in the new subscription"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:152
-#: plugin-options/widget-options.php:152
+#: plugin-options/shortcode-options.php:136
+#: plugin-options/widget-options.php:136
 msgid "Auto-subscribe interest groups"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:154
-#: plugin-options/widget-options.php:154
+#: plugin-options/shortcode-options.php:138
+#: plugin-options/widget-options.php:138
 msgid "Select an interest group to which new users are automatically added"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:165
-#: plugin-options/widget-options.php:165
+#: plugin-options/shortcode-options.php:149
+#: plugin-options/widget-options.php:149
 msgid "Show the following interest groups"
+msgstr ""
+
+#: plugin-options/shortcode-options.php:151
+#: plugin-options/widget-options.php:151
+msgid "Select interests groups that user can choose among"
 msgstr ""
 
 #: plugin-options/shortcode-options.php:167
 #: plugin-options/widget-options.php:167
-msgid "Select interests groups that user can choose among"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:183
-#: plugin-options/widget-options.php:183
 msgid "Field Options"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:190
-#: plugin-options/widget-options.php:190
+#: plugin-options/shortcode-options.php:174
+#: plugin-options/widget-options.php:174
 #: templates/admin/types/advanced-integration-item.php:48
 msgid "Fields"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:201
-#: plugin-options/widget-options.php:201
+#: plugin-options/shortcode-options.php:185
+#: plugin-options/widget-options.php:185
 msgid "Style Options"
+msgstr ""
+
+#: plugin-options/shortcode-options.php:192
+#: plugin-options/widget-options.php:192
+msgid "Enable custom CSS"
+msgstr ""
+
+#: plugin-options/shortcode-options.php:194
+#: plugin-options/widget-options.php:194
+msgid "Check this option to enable custom CSS handling"
+msgstr ""
+
+#: plugin-options/shortcode-options.php:200
+#: plugin-options/widget-options.php:200
+msgid "Round Corners for \"Subscribe\" Button"
+msgstr ""
+
+#: plugin-options/shortcode-options.php:202
+#: plugin-options/widget-options.php:202
+msgid "Check this option  to make button corners round"
 msgstr ""
 
 #: plugin-options/shortcode-options.php:208
 #: plugin-options/widget-options.php:208
-msgid "Enable custom CSS"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:210
-#: plugin-options/widget-options.php:210
-msgid "Check this option to enable custom CSS handling"
+msgid "\"Subscribe\" Button Background Color"
 msgstr ""
 
 #: plugin-options/shortcode-options.php:216
 #: plugin-options/widget-options.php:216
-msgid "Round Corners for \"Subscribe\" Button"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:218
-#: plugin-options/widget-options.php:218
-msgid "Check this option  to make button corners round"
+msgid "\"Subscribe\" Button Text Color"
 msgstr ""
 
 #: plugin-options/shortcode-options.php:224
 #: plugin-options/widget-options.php:224
-msgid "\"Subscribe\" Button Background Color"
+msgid "\"Subscribe\" Button Border Color"
 msgstr ""
 
 #: plugin-options/shortcode-options.php:232
 #: plugin-options/widget-options.php:232
-msgid "\"Subscribe\" Button Text Color"
+msgid "\"Subscribe\" Button Hover Background Color"
 msgstr ""
 
 #: plugin-options/shortcode-options.php:240
 #: plugin-options/widget-options.php:240
-msgid "\"Subscribe\" Button Border Color"
+msgid "\"Subscribe\" Button Hover Text Color"
 msgstr ""
 
 #: plugin-options/shortcode-options.php:248
 #: plugin-options/widget-options.php:248
-msgid "\"Subscribe\" Button Hover Background Color"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:256
-#: plugin-options/widget-options.php:256
-msgid "\"Subscribe\" Button Hover Text Color"
-msgstr ""
-
-#: plugin-options/shortcode-options.php:264
-#: plugin-options/widget-options.php:264
 msgid "\"Subscribe\" Button Hover Border Color"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:272
+#: plugin-options/shortcode-options.php:256
 msgid "Custom CSS"
 msgstr ""
 
-#: plugin-options/shortcode-options.php:274
+#: plugin-options/shortcode-options.php:258
 msgid "Insert here your custom CSS that has to be applied to the shortcode"
+msgstr ""
+
+#: plugin-options/store-options.php:24
+msgid "Store integrations"
+msgstr ""
+
+#: plugin-options/store-options.php:40
+msgid "Store list"
+msgstr ""
+
+#: plugin-options/store-options.php:43
+msgid "Select the list that you want to use for your store integration"
+msgstr ""
+
+#: plugin-options/store-options.php:43
+msgid ""
+"Select the list that you want to use for your store integration; you cannot "
+"change this option, unless you delete the previously created store"
+msgstr ""
+
+#: plugin-options/store-options.php:53
+msgid "Store name"
+msgstr ""
+
+#: plugin-options/store-options.php:56
+msgid ""
+"Select the name that you want to assign to your store on Mailchimp dashboard"
+msgstr ""
+
+#: plugin-options/store-options.php:64
+msgid "Store address line 1"
+msgstr ""
+
+#: plugin-options/store-options.php:67 plugin-options/store-options.php:77
+msgid "Enter address of your store (leave empty to use global store settings)"
+msgstr ""
+
+#: plugin-options/store-options.php:74
+msgid "Store address line 2"
+msgstr ""
+
+#: plugin-options/store-options.php:84
+msgid "Store city"
+msgstr ""
+
+#: plugin-options/store-options.php:87
+msgid "Enter city of your store (leave empty to use global store settings)"
+msgstr ""
+
+#: plugin-options/store-options.php:94
+msgid "Store postcode"
+msgstr ""
+
+#: plugin-options/store-options.php:97
+msgid "Enter postcode of your store (leave empty to use global store settings)"
+msgstr ""
+
+#: plugin-options/store-options.php:104
+msgid "Store state"
+msgstr ""
+
+#: plugin-options/store-options.php:107 plugin-options/store-options.php:117
+msgid "Enter state of your store (leave empty to use global store settings)"
+msgstr ""
+
+#: plugin-options/store-options.php:114
+msgid "Store country"
+msgstr ""
+
+#: plugin-options/store-options.php:134
+msgid "Store Synchronization"
+msgstr ""
+
+#: plugin-options/store-options.php:143
+msgid "Start sync"
+msgstr ""
+
+#: plugin-options/store-options.php:148
+msgid "Start Sync"
+msgstr ""
+
+#: plugin-options/store-options.php:156
+msgid ""
+"Start store synchronization <b>Note that this may take a while, and will be "
+"processed in the background</b>"
+msgstr ""
+
+#: plugin-options/store-options.php:162
+msgid "Resume sync"
+msgstr ""
+
+#: plugin-options/store-options.php:167
+msgid "Resume Sync"
+msgstr ""
+
+#: plugin-options/store-options.php:175
+msgid ""
+"Start store syncronization <b>Note that this may take a while, and will be "
+"processed in the background</b>"
+msgstr ""
+
+#: plugin-options/store-options.php:181
+msgid "Sync again"
+msgstr ""
+
+#: plugin-options/store-options.php:186
+msgid "Sync Again"
+msgstr ""
+
+#: plugin-options/store-options.php:194
+msgid ""
+"Rerun store synchronization <b>Note that this may take a while, and will be "
+"processed in the background</b>"
+msgstr ""
+
+#: plugin-options/store-options.php:200
+msgid "Stop sync"
+msgstr ""
+
+#: plugin-options/store-options.php:205
+msgid "Stop Sync"
+msgstr ""
+
+#: plugin-options/store-options.php:213
+msgid "Stop store synchronization"
 msgstr ""
 
 #: plugin-options/widget-options.php:24
@@ -970,123 +1416,124 @@ msgid "Widget Options"
 msgstr ""
 
 #: plugin-options/widget-options.php:26
+#, php-format
 msgid ""
 "Set here the options for <b>YITH MailChimp Subscription Form</b> widget; use "
 "the widget in you sidebars, by selecting it from <a href=\"%s\">Appearance > "
 "Widgets</a>"
 msgstr ""
 
-#: plugin-options/widget-options.php:114
-msgid ""
-"When you check this option, interest group of an already registered user "
-"will be replaced with the one selected in the new subscription"
-msgstr ""
-
-#: plugin-options/widget-options.php:272
+#: plugin-options/widget-options.php:256
 msgid "Custom css"
 msgstr ""
 
-#: plugin-options/widget-options.php:274
+#: plugin-options/widget-options.php:258
 msgid "Insert here your custom CSS for the widget"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:13
-#: templates/admin/types/integration-status.php:17
+#: templates/admin/mailchimp-dashboard-widget.php:7
+#: templates/admin/types/integration-status.php:11
 msgid "MailChimp user"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:13
-#: templates/admin/types/integration-status.php:17
+#: templates/admin/mailchimp-dashboard-widget.php:7
+#: templates/admin/types/integration-status.php:11
 msgid "No user can be found with this API key"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:14
+#: templates/admin/mailchimp-dashboard-widget.php:8
+#: templates/admin/mailchimp-dashboard-widget.php:25
 #: templates/admin/mailchimp-dashboard-widget.php:31
-#: templates/admin/mailchimp-dashboard-widget.php:37
-#: templates/admin/types/integration-status.php:18
+#: templates/admin/types/integration-status.php:12
+#: templates/admin/types/integration-status.php:29
 #: templates/admin/types/integration-status.php:35
-#: templates/admin/types/integration-status.php:41
+#: templates/admin/types/store-integration-status.php:17
+#: templates/admin/types/store-integration-status.php:29
 msgid "&lt; Not Found &gt;"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:19
-#: templates/admin/types/integration-status.php:23
+#: templates/admin/mailchimp-dashboard-widget.php:13
+#: templates/admin/types/integration-status.php:17
+#: templates/admin/types/store-integration-status.php:9
 msgid "Status:"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:22
-#: templates/admin/types/integration-status.php:26
+#: templates/admin/mailchimp-dashboard-widget.php:16
+#: templates/admin/types/integration-status.php:20
+#: templates/admin/types/store-integration-status.php:11
 msgid "Correctly synchronized"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:22
-#: templates/admin/types/integration-status.php:26
+#: templates/admin/mailchimp-dashboard-widget.php:16
+#: templates/admin/types/integration-status.php:20
+#: templates/admin/types/store-integration-status.php:11
 msgid "OK"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:24
-#: templates/admin/types/integration-status.php:28
+#: templates/admin/mailchimp-dashboard-widget.php:18
+#: templates/admin/types/integration-status.php:22
 msgid "Wrong API key"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:24
-#: templates/admin/types/integration-status.php:28
+#: templates/admin/mailchimp-dashboard-widget.php:18
+#: templates/admin/types/integration-status.php:22
 msgid "KO"
+msgstr ""
+
+#: templates/admin/mailchimp-dashboard-widget.php:23
+#: templates/admin/types/integration-status.php:27
+#: templates/admin/types/store-integration-status.php:15
+msgid "Name:"
 msgstr ""
 
 #: templates/admin/mailchimp-dashboard-widget.php:29
 #: templates/admin/types/integration-status.php:33
-msgid "Name:"
-msgstr ""
-
-#: templates/admin/mailchimp-dashboard-widget.php:35
-#: templates/admin/types/integration-status.php:39
 msgid "Email:"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:47
+#: templates/admin/mailchimp-dashboard-widget.php:41
 msgid "Prev"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:48
+#: templates/admin/mailchimp-dashboard-widget.php:42
 msgid "Next"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:56
+#: templates/admin/mailchimp-dashboard-widget.php:50
 msgid "Member count"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:59
+#: templates/admin/mailchimp-dashboard-widget.php:53
 msgid "total"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:63
+#: templates/admin/mailchimp-dashboard-widget.php:57
 msgid "Avg sub rate"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:66
-#: templates/admin/mailchimp-dashboard-widget.php:73
+#: templates/admin/mailchimp-dashboard-widget.php:60
+#: templates/admin/mailchimp-dashboard-widget.php:67
 msgid "per month"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:70
+#: templates/admin/mailchimp-dashboard-widget.php:64
 msgid "Avg unsub rate"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:77
+#: templates/admin/mailchimp-dashboard-widget.php:71
 msgid "Open rate"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:80
-#: templates/admin/mailchimp-dashboard-widget.php:87
+#: templates/admin/mailchimp-dashboard-widget.php:74
+#: templates/admin/mailchimp-dashboard-widget.php:81
 msgid "per campaign"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:84
+#: templates/admin/mailchimp-dashboard-widget.php:78
 msgid "Click rate"
 msgstr ""
 
-#: templates/admin/mailchimp-dashboard-widget.php:96
+#: templates/admin/mailchimp-dashboard-widget.php:90
 msgid "Refresh stats"
 msgstr ""
 
@@ -1237,7 +1684,7 @@ msgstr ""
 
 #: templates/admin/types/advanced-integration-condition.php:84
 #: templates/admin/types/advanced-integration-field.php:36
-#: templates/admin/types/custom-fields-item.php:31
+#: templates/admin/types/custom-fields-item.php:32
 msgid "Remove"
 msgstr ""
 
@@ -1250,7 +1697,7 @@ msgid "MailChimp field"
 msgstr ""
 
 #: templates/admin/types/advanced-integration-field.php:34
-#: templates/admin/types/custom-fields-item.php:26
+#: templates/admin/types/custom-fields-item.php:27
 msgid "Update fields"
 msgstr ""
 
@@ -1260,6 +1707,10 @@ msgstr ""
 
 #: templates/admin/types/advanced-integration-item.php:4
 msgid "remove"
+msgstr ""
+
+#: templates/admin/types/advanced-integration-item.php:5
+msgid "Options Set #"
 msgstr ""
 
 #: templates/admin/types/advanced-integration-item.php:10
@@ -1327,6 +1778,22 @@ msgstr ""
 msgid "To"
 msgstr ""
 
+#: templates/admin/types/store-integration-status.php:21
+msgid "List:"
+msgstr ""
+
+#: templates/admin/types/store-integration-status.php:27
+msgid "Currency:"
+msgstr ""
+
+#: templates/admin/types/store-integration-status.php:33
+msgid "Address:"
+msgstr ""
+
+#: templates/admin/types/store-integration-status.php:46
+msgid "Disconnect store"
+msgstr ""
+
 #: templates/types/address.php:11
 msgid "Street Address"
 msgstr ""
@@ -1345,30 +1812,4 @@ msgstr ""
 
 #: templates/types/address.php:19
 msgid "Zip"
-msgstr ""
-
-#. Plugin Name of the plugin/theme
-msgid "YITH WooCommerce Mailchimp Premium"
-msgstr ""
-
-#. Plugin URI of the plugin/theme
-msgid "https://yithemes.com/themes/plugins/yith-woocommerce-mailchimp/"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid ""
-"<code><strong>YITH WooCommerce Mailchimp</strong></code> allows you to "
-"manage and create forms to register to MailChimp lists, helping you to "
-"outline users through tags and groups in a dynamic way. You will have a "
-"perfect system to send emails with a percentage of conversion higher than "
-"the average. <a href=\"https://yithemes.com/\" target=\"_blank\">Get more "
-"plugins for your e-commerce on <strong>YITH</strong></a>"
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "YITH"
-msgstr ""
-
-#. Author URI of the plugin/theme
-msgid "https://yithemes.com/"
 msgstr ""

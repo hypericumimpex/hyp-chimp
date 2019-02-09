@@ -138,10 +138,17 @@ if ( ! class_exists( 'YITH_WCMC_Admin' ) ) {
 					'labels' => array(
 						'update_list_button' => __( 'Update Lists', 'yith-woocommerce-mailchimp' ),
 						'update_group_button' => __( 'Update Groups', 'yith-woocommerce-mailchimp' ),
-						'update_field_button' => __( 'Update Fields', 'yith-woocommerce-mailchimp' )
+						'update_field_button' => __( 'Update Fields', 'yith-woocommerce-mailchimp' ),
+						'connect_store' => __('Connect Store', 'yith-woocommerce-mailchimp'),
+						'confirm_store_delete' => __( "Are you sure you want to disconnect your store?\n
+This will delete all store data from your Mailchimp account, including Products, Coupons, Orders and Customers", 'yith-woocommerce-mailchimp' )
 					),
 					'actions' => array(
-						'do_request_via_ajax_action' => 'do_request_via_ajax'
+						'do_request_via_ajax_action' => 'do_request_via_ajax',
+						'retrieve_lists_via_ajax_action' => 'retrieve_lists_via_ajax',
+						'retrieve_groups_via_ajax_action' => 'retrieve_groups_via_ajax',
+						'retrieve_fields_via_ajax_action' => 'retrieve_fields_via_ajax',
+						'disconnect_store_via_ajax_action' => 'disconnect_store_via_ajax'
 					),
 					'ajax_request_nonce' => wp_create_nonce( 'yith_wcmc_ajax_request' )
 				) );
@@ -185,13 +192,12 @@ if ( ! class_exists( 'YITH_WCMC_Admin' ) ) {
 		 * @since 1.0.0
 		 */
 		public function print_custom_yith_wcmc_integration_status( $value ){
-			$result = YITH_WCMC()->do_request( 'users/profile' );
+			$result = YITH_WCMC()->do_request( 'get' );
 
-			$user_id = isset( $result['id'] ) ? $result['id'] : false;
+			$user_id = isset( $result['account_id'] ) ? $result['account_id'] : false;
 			$username = isset( $result['username'] ) ? $result['username'] : false;
-			$name = isset( $result['name'] ) ? $result['name'] : false;
+			$name = isset( $result['account_name'] ) ? $result['account_name'] : false;
 			$email = isset( $result['email'] ) ? $result['email'] : false;
-			$avatar = isset( $result['avatar'] ) ? $result['avatar'] : false;
 
 			include( YITH_WCMC_DIR . 'templates/admin/types/integration-status.php' );
 		}
@@ -221,7 +227,11 @@ if ( ! class_exists( 'YITH_WCMC_Admin' ) ) {
 		}
 
 		/**
+		 * Print metabox, to highlight user preferences
 		 *
+		 * @var $post \WP_Post Current order
+		 *
+		 * @return void
 		 */
 		public function print_user_preferences_metabox( $post ) {
 			$order = wc_get_order( $post );
@@ -261,7 +271,7 @@ if ( ! class_exists( 'YITH_WCMC_Admin' ) ) {
 		 * @param $plugin_data
 		 * @param $status
 		 *
-		 * @return   Array
+		 * @return   array
 		 * @since    1.0
 		 * @author   Andrea Grillo <andrea.grillo@yithemes.com>
 		 * @use plugin_row_meta

@@ -3,13 +3,13 @@
  * Plugin Name: HYP Chimp
  * Plugin URI: https://github.com/hypericumimpex/hyp-chimp/
  * Description: <code><strong>HYP Chimp</strong></code>Integrare Hypericum Mailchimp</a>
- * Version: 1.1.5
+ * Version: 2.0
  * Author: Romeo C.
  * Author URI: https://github.com/hypericumimpex/
  * Text Domain: yith-woocommerce-mailchimp
  * Domain Path: /languages/
  * WC requires at least: 2.5.0
- * WC tested up to: 3.5.0
+ * WC tested up to: 3.5.x
  *
  * @author Romeo C.
  * @package HYP Chimp
@@ -44,7 +44,11 @@ if ( ! defined( 'YITH_WCMC' ) ) {
 }
 
 if ( ! defined( 'YITH_WCMC_VERSION' ) ) {
-	define( 'YITH_WCMC_VERSION', '1.1.5' );
+	define( 'YITH_WCMC_VERSION', '2.0.0' );
+}
+
+if( ! defined( 'YITH_WCMC_DB_VERSION' ) ){
+    define( 'YITH_WCMC_DB_VERSION', '2.0.0' );
 }
 
 if ( ! defined( 'YITH_WCMC_URL' ) ) {
@@ -59,8 +63,8 @@ if ( ! defined( 'YITH_WCMC_INC' ) ) {
 	define( 'YITH_WCMC_INC', YITH_WCMC_DIR . 'includes/' );
 }
 
-if ( ! defined( 'YITH_WCMC_INIT' ) ) {
-	define( 'YITH_WCMC_INIT', plugin_basename( __FILE__ ) );
+if ( ! defined( 'YITH_WCMC_VENDOR' ) ) {
+	define( 'YITH_WCMC_VENDOR', YITH_WCMC_DIR . 'vendor/' );
 }
 
 if ( ! defined( 'YITH_WCMC_SECRET_KEY' ) ) {
@@ -73,6 +77,10 @@ if ( ! defined( 'YITH_WCMC_SLUG' ) ) {
 
 if ( ! defined( 'YITH_WCMC_PREMIUM' ) ) {
 	define( 'YITH_WCMC_PREMIUM', 1 );
+}
+
+if ( ! defined( 'YITH_WCMC_INIT' ) ) {
+	define( 'YITH_WCMC_INIT', plugin_basename( __FILE__ ) );
 }
 
 if ( ! defined( 'YITH_WCMC_PREMIUM_INIT' ) ) {
@@ -90,15 +98,20 @@ if ( ! function_exists( 'yith_mailchimp_constructor' ) ) {
 		load_plugin_textdomain( 'yith-woocommerce-mailchimp', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 		if ( ! class_exists( 'Mailchimp' ) ) {
-			require_once( YITH_WCMC_INC . 'mailchimp/Mailchimp.php' );
+			require_once( YITH_WCMC_VENDOR . 'autoload.php' );
 		}
 		require_once( YITH_WCMC_INC . 'functions.yith-wcmc.php' );
 		require_once( YITH_WCMC_INC . 'class.yith-wcmc.php' );
+		require_once( YITH_WCMC_INC . 'class.yith-wcmc-api-exception.php' );
 		require_once( YITH_WCMC_INC . 'class.yith-wcmc-premium.php' );
+		require_once( YITH_WCMC_INC . 'class.yith-wcmc-background-process.php' );
+		require_once( YITH_WCMC_INC . 'class.yith-wcmc-store-register.php' );
+		require_once( YITH_WCMC_INC . 'class.yith-wcmc-store.php' );
 		require_once( YITH_WCMC_INC . 'class.yith-wcmc-widget.php' );
 
 		// Let's start the game
 		YITH_WCMC_Premium();
+		YITH_WCMC_Store();
 
 		if ( is_admin() ) {
 			require_once( YITH_WCMC_INC . 'class.yith-wcmc-admin.php' );

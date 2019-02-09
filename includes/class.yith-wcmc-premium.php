@@ -51,10 +51,14 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			add_action( 'init', array( $this, 'register_shortcode' ) );
 			add_action( 'init', array( $this, 'post_form_subscribe' ) );
 			add_action( 'init', array( $this, 'register_campaign_cookie' ) );
+			add_action( 'init', array( $this, 'register_gutenberg_block' ) );
+
 			add_action( 'woocommerce_checkout_update_order_meta', array( $this, 'register_ecommerce360_campaign_data' ), 10, 1 );
-			add_action( 'woocommerce_order_status_completed', array( $this, 'ecommerce360_handling' ), 15, 1 );
-			add_action( 'woocommerce_order_status_processing', array( $this, 'ecommerce360_handling' ), 15, 1 );
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
+			//add_action( 'woocommerce_order_status_completed', array( $this, 'ecommerce360_handling' ), 15, 1 );
+			//add_action( 'woocommerce_order_status_processing', array( $this, 'ecommerce360_handling' ), 15, 1 );
+
+			add_action( 'init', array( $this, 'register_scripts' ) );
+			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 			// handles ajax requests
 			add_action( 'wp_ajax_yith_wcmc_subscribe', array( $this, 'ajax_form_subscribe' ) );
@@ -66,19 +70,62 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			parent::__construct();
 		}
 
+		/**
+		 * Install db tables when updating to new version of db structure
+		 *
+		 * @return void
+		 * @since 2.0.0
+		 */
+		public function install_db() {
+			global $wpdb;
+
+			// adds tables name in global $wpdb
+			$wpdb->yith_wcmc_register = $wpdb->prefix . 'yith_wcmc_register';
+
+			$current_db_version = get_option( 'yith_wcmc_db_version', '' );
+			if( version_compare( $current_db_version, YITH_WCMC_DB_VERSION, '>=' ) ) {
+				return;
+			}
+
+			// assure dbDelta function is defined
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+			// retrieve table charset
+			$charset_collate = $wpdb->get_charset_collate();
+
+			// adds register table
+			$sql = "CREATE TABLE $wpdb->yith_wcmc_register (
+                    ID bigint(20) NOT NULL AUTO_INCREMENT,
+                    item_type varchar(255) NOT NULL,
+                    item_id bigint(20) NOT NULL,
+                    mc_id varchar(255) NOT NULL,
+                    last_updated datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+                    PRIMARY KEY ID (ID)
+				) $charset_collate;";
+
+			// update db to latest version
+			dbDelta( $sql );
+
+			// perform related operation for specific db update
+			add_action( 'yith_wcmc_update_db_2.0.0', array( $this, 'install_update_200' ) );
+
+			do_action( 'yith_wcmc_update_db_' . YITH_WCMC_DB_VERSION );
+			update_option( 'yith_wcmc_db_version', YITH_WCMC_DB_VERSION );
+		}
+
 		/* === ENQUEUE SCRIPTS === */
 
 		/**
-		 * Enqueue scripts
+		 * Register scripts
 		 *
 		 * @return void
-		 * @since 1.0.0
+		 * @since 2.0.0
 		 */
-		public function enqueue() {
+		public function register_scripts() {
 			$path = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? '/unminified' : '';
 			$prefix = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? '' : '.min';
 
-			wp_enqueue_script( 'yith-wcmc', YITH_WCMC_URL . 'assets/js' . $path . '/yith-wcmc' . $prefix . '.js', array( 'jquery', 'jquery-blockui' ), YITH_WCMC_VERSION, true );
+			wp_register_script( 'yith-wcmc', YITH_WCMC_URL . 'assets/js' . $path . '/yith-wcmc' . $prefix . '.js', array( 'jquery', 'jquery-blockui' ), YITH_WCMC_VERSION, true );
 
 			wp_localize_script( 'yith-wcmc', 'yith_wcmc', array(
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -86,6 +133,16 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 					'yith_wcmc_subscribe_action' => 'yith_wcmc_subscribe'
 				)
 			) );
+		}
+
+		/**
+		 * Enqueue scripts
+		 *
+		 * @return void
+		 * @since 1.0.0
+		 */
+		public function enqueue_scripts() {
+			wp_enqueue_script( 'yith-wcmc' );
 		}
 		
 		/* === HANDLE ECOMMERCE 360 INTEGRATION === */
@@ -100,7 +157,7 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			$ecommerce360_enable = 'yes' == get_option( 'yith_wcmc_ecommerce360_enable' );
 			$ecommerce360_cookie_lifetime = get_option( 'yith_wcmc_ecommerce360_cookie_lifetime' );
 
-			if( isset( $_GET['mc_cid'] ) || isset( $_GET['mc_eid'] ) && $ecommerce360_enable ){
+			if( isset( $_GET['mc_cid'] ) || isset( $_GET['mc_eid'] ) || isset( $_GET['mc_tc'] ) && $ecommerce360_enable ){
 				$data_to_set = array();
 
 				if( ! empty( $_GET['mc_cid'] ) ){
@@ -111,13 +168,17 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 					$data_to_set['eid'] = $_GET['mc_eid'];
 				}
 
+				if( ! empty( $_GET['mc_tc'] ) ){
+					$data_to_set['tc'] = $_GET['mc_tc'];
+				}
+
 				$parsed_data = urlencode( serialize( $data_to_set ) );
 
 				wc_setcookie( 'yith_wcmc_ecommerce_360', $parsed_data, time() + $ecommerce360_cookie_lifetime );
 			}
 		}
 
-		/* === HANDLE ORDER SUBSCRIPTION === */
+		/* === HANDLE STORE INTEGRATION === */
 
 		/**
 		 * Call subscribe API handle, to register user to a specific list
@@ -131,17 +192,19 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			$integration_mode = get_option( 'yith_wcmc_mailchimp_integration_mode', 'simple' );
 			$args = array();
 
-			$args['replace_interests'] = 'yes' == get_option( 'yith_wcmc_replace_interests', true );
-
 			if( 'simple' == $integration_mode ){
 				//manage groups
 				$selected_groups = get_option( 'yith_wcmc_mailchimp_groups', array() );
 				$group_structure = $this->_create_group_structure( $selected_groups );
 
 				if( ! empty( $group_structure ) ){
-					$args['merge_vars']['groupings'] = $group_structure;
-					$args['merge_vars']['FNAME'] = yit_get_prop( $order, 'billing_first_name', true );
-					$args['merge_vars']['LNAME'] = yit_get_prop( $order, 'billing_last_name', true );
+					$args['interests'] = $group_structure;
+
+					$merge_fields = new stdClass();
+					$merge_fields->FNAME = yit_get_prop( $order, 'billing_first_name', true );
+					$merge_fields->LNAME = yit_get_prop( $order, 'billing_last_name', true );
+
+					$args['merge_fields'] = $merge_fields;
 				}
 
 				$res = parent::order_subscribe( $order_id, $args );
@@ -169,7 +232,7 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 						$group_structure = $this->_create_group_structure( $selected_groups );
 
 						if( ! empty( $group_structure ) ){
-							$args['merge_vars']['groupings'] = $group_structure;
+							$args['interests'] = $group_structure;
 						}
 
 						// manage fields
@@ -177,10 +240,7 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 						$field_structure = $this->_create_field_structure( $selected_fields, $order_id );
 
 						if( ! empty( $field_structure ) ){
-							$args['merge_vars'] = array_merge(
-								isset( $args['merge_vars'] ) ? $args['merge_vars'] : array(),
-								$field_structure
-							);
+							$args['merge_fields'] = $field_structure;
 						}
 
 						$partial = parent::order_subscribe( $order_id, $args );
@@ -223,23 +283,48 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 		public function ecommerce360_handling( $order_id ){
 			$order = wc_get_order( $order_id );
 
-			$parse              = parse_url( site_url() );
 			$campaign_data      = get_post_meta( $order_id, '_yith_wcmc_ecommerce_360_data', true );
 			$campaign_processed = get_post_meta( $order_id, '_yith_wcmc_ecommerce_360_processed', true );
 
+			$list_id            = apply_filters( 'yith_wcmc_store_list', get_option( 'yith_wcmc_ecommerce360_list' ) );
+			$store_id           = get_option( "yith_wcmc_{$list_id}_store" );
+
 			if ( $campaign_processed != 'yes' && isset( $campaign_data['cid'] ) && isset( $campaign_data['eid'] ) ) {
+
+				// create a store if not yet created
+				if( ! $store_id ){
+					$store_id = $this->_create_store( $list_id );
+					update_option( "yith_wcmc_{$list_id}_store", $store_id );
+				}
+
 				$request_arg = array(
-					'order' => array(
-						'id'          => $order_id,
-						'campaign_id' => isset( $campaign_data['cid'] ) ? $campaign_data['cid'] : false,
-						'email_id'    => isset( $campaign_data['eid'] ) ? $campaign_data['eid'] : false,
-						'email'       => yit_get_prop( $order, 'billing_email', true ),
-						'total'       => $order->get_total(),
-						'order_date'  => date( 'Y-m-d H:i:s', strtotime( yit_get_prop( $order, 'order_date' ) ) ),
-						'shipping'    => method_exists( $order, 'get_shipping_total' ) ? $order->get_shipping_total() : $order->get_total_shipping(),
-						'tax'         => $order->get_total_tax(),
-						'store_id'    => substr( preg_replace( '/[^a-zA-Z0-9]+/', '', $parse['host'] ), 0, 32 ),
-						'store_name'  => $parse['host']
+					'id'               => $order_id,
+					'customer'         => array(
+
+					),
+					'campaign_id'      => isset( $campaign_data['cid'] ) ? $campaign_data['cid'] : false,
+					'currency_code'    => get_woocommerce_currency(),
+					'order_total'      => $order->get_total(),
+					'tax_total'        => $order->get_total_tax(),
+					'shipping_total'   => $order->get_total_shipping(),
+					'tracking_code'    => isset( $campaign_data['tc'] ) ? $campaign_data['tc'] : '',
+					'shipping_address' => array(
+						'name'          => $order->shipping_first_name . ' ' . $order->shipping_last_name,
+						'address1'      => $order->shipping_address_1,
+						'address2'      => $order->shipping_address_2,
+						'city'          => $order->shipping_city,
+						'province_code' => $order->shipping_state,
+						'postal_code'   => $order->shipping_postcode,
+						'country'       => $order->shipping_country
+					),
+					'billing_address'  => array(
+						'name'          => $order->billing_first_name . ' ' . $order->billing_last_name,
+						'address1'      => $order->billing_address_1,
+						'address2'      => $order->billing_address_2,
+						'city'          => $order->billing_city,
+						'province_code' => $order->billing_state,
+						'postal_code'   => $order->billing_postcode,
+						'country'       => $order->billing_country
 					)
 				);
 
@@ -253,36 +338,27 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 							 * @var $item \WC_Order_Item_Product
 							 */
 							$product_id = $item->get_product_id();
+							$product_variation_id = $item->get_variation_id();
 							$product = $item->get_product();
 						}
 						else {
-							$product_id = ( ! empty( $item['variation_id'] ) ) ? $item['variation_id'] : $item['product_id'];
-							$product    = wc_get_product( $product_id );
+							$product_id = $item['product_id'];
+							$product_variation_id = ! empty( $item['variation_id'] ) ? $item['variation_id'] : '';
+							$product    = wc_get_product( $product_variation_id ? $product_variation_id : $product_id );
 						}
-						
-						$product_terms = get_the_terms( $product_id, 'product_cat' );
-
-						if( empty( $product_terms ) ){
-							continue;
-						}
-
-						$main_product_term = $product_terms[0];
 
 						$items_arg[] = array(
-							'line_num' => $item_id,
+							'id' => $item_id,
 							'product_id' => $product_id,
-							'sku' => yit_get_prop( $product, 'sku', true ),
-							'product_name' => $product->get_title(),
-							'category_id' => $main_product_term->term_id,
-							'category_name' => $main_product_term->name,
-							'qty' => $item['qty'],
-							'cost' => $order->get_item_total( $item )
+							'product_variant_id' => $product_variation_id,
+							'quantity' => $item['qty'],
+							'price' => $order->get_item_total( $item )
 						);
 					}
 				}
 
-				$request_arg['order']['items'] = $items_arg;
-				$this->do_request( 'ecomm/order-add', $request_arg );
+				$request_arg['lines'] = $items_arg;
+				$this->do_request( 'post', "ecommerce/stores/{$store_id}/orders", $request_arg );
 
 				yit_save_prop( $order, '_yith_wcmc_ecommerce_360_processed', 'yes' );
 			}
@@ -293,41 +369,27 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 		 *
 		 * @param $selected_groups array Array of selected groups
 		 *
-		 * @return array A valid array to use in subscription request
+		 * @return stdClass A valid object to use in subscription request
 		 * @since 1.0.0
 		 */
 		protected function _create_group_structure( $selected_groups ){
-			if( empty( $selected_groups ) ) {
-				return array();
-			}
+			$group_to_register = new stdClass();
 
-			$group_to_register = array();
-			$group_structure = array();
+			if( empty( $selected_groups ) ) {
+				return $group_to_register;
+			}
 
 			foreach( $selected_groups as $group ){
 				if( strpos( $group, '-' ) === false ){
 					continue;
 				}
 
-				list( $group_id, $interest_group ) = explode( '-', $group );
+				list( $group_id, $interest_id ) = explode( '-', $group );
 
-				if( ! isset( $group_to_register[ $group_id ] ) ){
-					$group_to_register[ $group_id ] = array( $interest_group );
-				}
-				elseif( ! in_array( $group, $group_to_register[ $group_id ] ) ){
-					$group_to_register[ $group_id ][] = $interest_group;
-				}
+				$group_to_register->$interest_id = true;
 			}
 
-			if( ! empty( $group_to_register ) ){
-				foreach( $group_to_register as $id => $interest_groups ){
-					$group_structure[] = array(
-						'id' => $id,
-						'groups' => $interest_groups
-					);
-				}
-			}
-			return $group_structure;
+			return $group_to_register;
 		}
 
 		/**
@@ -336,25 +398,25 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 		 * @param $selected_fields array Array of selected fields to register
 		 * @param $order_id int Order id
 		 *
-		 * @return array A valid array to use in subscription request
+		 * @return stdClass A valid object to use in subscription request
 		 * @since 1.0.0
 		 */
 		protected function _create_field_structure( $selected_fields, $order_id ){
+			$field_structure = new stdClass();
+
 			if( empty( $selected_fields ) ){
-				return array();
+				return $field_structure;
 			}
 
 			$order = wc_get_order( $order_id );
 
 			if( empty( $order ) ){
-				return array();
+				return $field_structure;
 			}
-
-			$field_structure = array();
 
 			foreach( $selected_fields as $field ){
 				$field_value = yit_get_prop( $order, $field['checkout'], true );
-				$field_structure[ $field['merge_var'] ] = $field_value;
+				$field_structure->{ $field['merge_var'] } = $field_value;
 
 				if( ! is_null( WC()->customer ) ) {
 					$checkout_fields = WC()->checkout()->get_checkout_fields();
@@ -401,7 +463,7 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 					case 'product_in_cart':
 
 						$set_operator = $condition['op_set'];
-						$selected_products = explode( ',', $condition['products'] );
+						$selected_products = is_array( $condition['products'] ) ? $condition['products'] : explode( ',', $condition['products'] );
 						$items = $order->get_items( 'line_item' );
 						$products_in_cart = array();
 
@@ -708,8 +770,6 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 				'email_type' => get_option( 'yith_wcmc_shortcode_email_type', 'html' ),
 				'double_optin' => get_option( 'yith_wcmc_shortcode_double_optin' ),
 				'update_existing' => get_option( 'yith_wcmc_shortcode_update_existing' ),
-				'replace_interests' => get_option( 'yith_wcmc_shortcode_replace_interests' ),
-				'send_welcome' => get_option( 'yith_wcmc_shortcode_send_welcome' ),
 				'list' => get_option( 'yith_wcmc_shortcode_mailchimp_list' ),
 				'groups' => implode( '#%,%#', get_option( 'yith_wcmc_shortcode_mailchimp_groups', array() ) ),
 				'groups_to_prompt' => get_option( 'yith_wcmc_shortcode_mailchimp_groups_selectable', array() ),
@@ -723,6 +783,10 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			if( ! empty( $selected_fields ) ){
 				$first = true;
 				foreach( $selected_fields as $field ){
+					if( ! isset( $field['merge_var'] ) ){
+						continue;
+					}
+
 					if( ! $first ){
 						$textual_fields .= '|';
 					}
@@ -779,8 +843,6 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			$show_privacy_field = ( 'yes' == $show_privacy_field );
 			$double_optin       = ( 'yes' == $double_optin );
 			$update_existing    = ( 'yes' == $update_existing );
-			$replace_interests  = ( 'yes' == $replace_interests );
-			$send_welcome       = ( 'yes' == $send_welcome );
 			$enable_style       = ( 'yes' == $enable_style );
 			$round_corners      = ( 'yes' == $round_corners );
 
@@ -789,6 +851,8 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 				$privacy_link = sprintf( '<a href="%s">%s</a>', get_the_permalink( wc_privacy_policy_page_id() ), apply_filters( 'yith_wcmc_privacy_policy_page_label', __( 'Privacy Policy', 'yith-woocommerce-mailchimp' ) ) );
 				$privacy_label = str_replace( '%privacy_policy%', $privacy_link, $privacy_label );
 			}
+			// let's third part filter privacy policy label
+            $privacy_label = apply_filters( 'yith_wcmc_privacy_policy_shortcode_label', $privacy_label );
 
 			if( empty( $list ) ){
 				return '';
@@ -798,13 +862,13 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			$fields_data = array();
 
 			if( ! empty( $fields ) ) {
-				$fields_data_raw = $this->do_request( 'lists/merge-vars', array( 'id' => array( $list ) ) );
+				$fields_data_raw = $this->do_request( 'get', "lists/{$list}/merge-fields" );
 
-				if ( ! isset( $fields_data_raw['data'] ) || ! isset( $fields_data_raw['data'][0] ) || ! isset( $fields_data_raw['data'][0]['merge_vars'] ) || empty( $fields_data_raw['data'][0]['merge_vars'] ) ) {
+				if( ! isset( $fields_data_raw['merge_fields'] ) || empty( $fields_data_raw['merge_fields'] ) ) {
 					return '';
 				}
 
-				$fields_data_raw = $fields_data_raw['data'][0]['merge_vars'];
+				$fields_data_raw = $fields_data_raw['merge_fields'];
 
 				foreach ( $fields_data_raw as $data ) {
 					$fields_data[ $data['tag'] ] = $data;
@@ -816,29 +880,35 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			$groups_to_prompt = ! is_array( $groups_to_prompt ) ? explode( '#%,%#', $groups_to_prompt ) : $groups_to_prompt;
 
 			if( ! empty( $groups_to_prompt ) ){
-				$available_groups = $this->do_request( 'lists/interest-groupings', array( 'id' => $list ) );
-				$available_groups_ids = ! isset( $available_groups['status'] ) ? wp_list_pluck( $available_groups, 'id' ) : array();
+				$available_groups = $this->do_request( 'get', "lists/{$list}/interest-categories" );
+				$available_groups_ids = wp_list_pluck( $available_groups['categories'], 'id' );
 
 				foreach( $groups_to_prompt as $interest_raw ){
 					if( strpos( $interest_raw, '-' ) === false ){
 						continue;
 					}
-					
-					list( $group, $interest ) = explode( '-', $interest_raw );
 
-					if( false !== $index = array_search( $group, $available_groups_ids ) ){
-						if( ! isset( $groups_data[ $group ] ) ){
-							$groups_data[ $group ] = array(
-								'id' => $group,
-								'name' => $available_groups[ $index ]['name'],
-								'type' => $available_groups[ $index ]['form_field'],
+					list( $group_id, $interest_id ) = explode( '-', $interest_raw );
+
+					if( false !== $index = array_search( $group_id, $available_groups_ids ) ){
+						$interest = $this->do_request( 'get', "lists/{$list}/interest-categories/{$group_id}/interests/{$interest_id}" );
+
+						if( ! isset( $interest['name'] ) ){
+							continue;
+						}
+
+						if( ! isset( $groups_data[ $group_id ] ) ){
+							$groups_data[ $group_id ] = array(
+								'id' => $group_id,
+								'name' => $available_groups['categories'][ $index ]['title'],
+								'type' => $available_groups['categories'][ $index ]['type'],
 								'interests' => array(
-									$interest
+									$interest_id => $interest['name']
 								)
 							);
 						}
 						else{
-							$groups_data[ $group ]['interests'][] = $interest;
+							$groups_data[ $group_id ]['interests'][$interest_id] = $interest['name'];
 						}
 					}
 				}
@@ -917,7 +987,7 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			$placeholder = ! empty( $panel_options['name'] ) && $use_placeholders ? $panel_options['name'] : '';
 
 			// retrieve template for the subscription form
-			$template_name = strtolower( $mailchimp_data['field_type'] ) . '.php';
+			$template_name = strtolower( $mailchimp_data['type'] ) . '.php';
 
 			$located = locate_template( array(
 				trailingslashit( WC()->template_path() ) . 'wcmc/types/' . $template_name,
@@ -945,8 +1015,9 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 		public function print_groups( $id, $mailchimp_data ) {
 			// set correct index in MailChimp data
 			$mailchimp_data['tag'] = $mailchimp_data['id'];
-			$mailchimp_data['req'] = false;
-			$mailchimp_data['choices'] = array_combine( $mailchimp_data['interests'], $mailchimp_data['interests'] );
+			$mailchimp_data['required'] = false;
+			$mailchimp_data['options']['choices'] = $mailchimp_data['interests'];
+			$mailchimp_data['use_id_instead_of_name'] = true;
 
 			$use_placeholders = apply_filters( 'yith_wcmc_use_placeholders_instead_of_labels', false );
 			$placeholder = ! empty( $mailchimp_data['name'] ) && $use_placeholders ? $mailchimp_data['name'] : '';
@@ -966,6 +1037,179 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			}
 
 			include( $located );
+		}
+
+		/**
+		 * Register Gutenberg blocks for current plugin
+		 *
+		 * @return void
+		 * @since 2.0.0
+		 */
+		public function register_gutenberg_block() {
+			$selected_fields = get_option( 'yith_wcmc_shortcode_custom_fields' );
+			$textual_fields = '';
+
+			if( ! empty( $selected_fields ) ){
+				$first = true;
+				foreach( $selected_fields as $field ){
+					if( ! isset( $field['merge_var'] ) ){
+						continue;
+					}
+
+					if( ! $first ){
+						$textual_fields .= '|';
+					}
+
+					$textual_fields .= $field['name'] . ',' . $field['merge_var'];
+
+					$first = false;
+				}
+			}
+
+			$blocks = array(
+				'yith-wcmc-subscription-form' => array(
+					'script'         => 'yith-wcmc',
+					'title'          => _x( 'YITH MailChimp Subscription Form', '[gutenberg]: block name', 'yith-woocommerce-mailchimp' ),
+					'description'    => _x( 'Show form to subscribe to your MailChimp list', '[gutenberg]: block description', 'yith-woocommerce-mailchimp' ),
+					'shortcode_name' => 'yith_wcmc_subscription_form',
+					'attributes'     => array(
+						'title'      => array(
+							'type'    => 'text',
+							'label'   => __( 'Form title', 'yith-woocommerce-mailchimp' ),
+							'default' => get_option( 'yith_wcmc_shortcode_title' ),
+						),
+						'submit_label'      => array(
+							'type'    => 'text',
+							'label'   => __( '"Submit" button label', 'yith-woocommerce-mailchimp' ),
+							'default' => get_option( 'yith_wcmc_shortcode_submit_button_label' ),
+						),
+						'success_message'      => array(
+							'type'    => 'textarea',
+							'label'   => __( '"Successfully Registered" message', 'yith-woocommerce-mailchimp' ),
+							'default' => get_option( 'yith_wcmc_shortcode_success_message' ),
+						),
+						'show_privacy_field'      => array(
+							'type'    => 'select',
+							'label'   => __( 'Show privacy checkbox', 'yith-woocommerce-mailchimp' ),
+							'options' => array(
+								'no' => __( 'Hide privacy field', 'yith-woocommerce-mailchimp' ),
+								'yes' => __( 'Show login form', 'yith-woocommerce-mailchimp' ),
+							),
+							'default' => get_option( 'yith_wcmc_shortcode_show_privacy_field' ),
+						),
+						'privacy_label'      => array(
+							'type'    => 'text',
+							'label'   => __( 'Privacy field label', 'yith-woocommerce-mailchimp' ),
+							'default' => get_option( 'yith_wcmc_shortcode_privacy_label' ),
+						),
+						'hide_form_after_registration'      => array(
+							'type'    => 'select',
+							'label'   => __( 'Hide form after registration	', 'yith-woocommerce-mailchimp' ),
+							'options' => array(
+								'no' => __( 'Do not hide form after registration', 'yith-woocommerce-mailchimp' ),
+								'yes' => __( 'Hide form after registration', 'yith-woocommerce-mailchimp' ),
+							),
+							'default' => get_option( 'yith_wcmc_shortcode_hide_after_registration' ),
+						),
+						'email_type'      => array(
+							'type'    => 'select',
+							'label'   => __( 'Email type', 'yith-woocommerce-mailchimp' ),
+							'options' => array(
+								'html' => __( 'HTML', 'yith-woocommerce-mailchimp' ),
+								'text' => __( 'Text', 'yith-woocommerce-mailchimp' ),
+							),
+							'default' => get_option( 'yith_wcmc_shortcode_email_type', 'html' ),
+						),
+						'double_optin'      => array(
+							'type'    => 'select',
+							'label'   => __( 'Double Opt-in	', 'yith-woocommerce-mailchimp' ),
+							'options' => array(
+								'no' => __( 'Disable double opt-in', 'yith-woocommerce-mailchimp' ),
+								'yes' => __( 'Enable double opt-in', 'yith-woocommerce-mailchimp' ),
+							),
+							'default' => get_option( 'yith_wcmc_shortcode_double_optin' ),
+						),
+						'update_existing'      => array(
+							'type'    => 'select',
+							'label'   => __( 'Update existing', 'yith-woocommerce-mailchimp' ),
+							'options' => array(
+								'no' => __( 'Do not update existing', 'yith-woocommerce-mailchimp' ),
+								'yes' => __( 'Update existing', 'yith-woocommerce-mailchimp' ),
+							),
+							'default' => get_option( 'yith_wcmc_shortcode_update_existing' ),
+						),
+						'list'      => array(
+							'type'    => 'select',
+							'label'   => __( 'MailChimp list', 'yith-woocommerce-mailchimp' ),
+							'options' => $this->retrieve_lists(),
+							'default' => get_option( 'yith_wcmc_shortcode_mailchimp_list' ),
+						),
+						'groups'      => array(
+							'type'    => 'textarea',
+							'label'   => __( 'Auto-subscribe interest groups (list of GROUP_ID-INTEREST_ID separated by special token #%,%#)', 'yith-woocommerce-mailchimp' ),
+							'default' => implode( '#%,%#', get_option( 'yith_wcmc_shortcode_mailchimp_groups', array() ) ),
+						),
+						'groups_to_prompt'      => array(
+							'type'    => 'textarea',
+							'label'   => __( 'Show the following interest groups (list of GROUP_ID-INTEREST_ID separated by special token #%,%#)', 'yith-woocommerce-mailchimp' ),
+							'default' => implode( '#%,%#', get_option( 'yith_wcmc_shortcode_mailchimp_groups_selectable', array() ) ),
+						),
+						'fields'      => array(
+							'type'    => 'textarea',
+							'label'   => __( 'Fields (list of LABEL,MERGE_VAR separated by special token |)', 'yith-woocommerce-mailchimp' ),
+							'default' => $textual_fields,
+						),
+						'enable_style'      => array(
+							'type'    => 'select',
+							'label'   => __( 'Enable custom CSS	', 'yith-woocommerce-mailchimp' ),
+							'options' => array(
+								'no' => __( 'Do not enable custom style', 'yith-woocommerce-mailchimp' ),
+								'yes' => __( 'Enable custom style', 'yith-woocommerce-mailchimp' ),
+							),
+							'default' => get_option( 'yith_wcmc_shortcode_style_enable' ),
+						),
+						'round_corners'      => array(
+							'type'    => 'select',
+							'label'   => __( 'Round Corners for "Subscribe" Button	 (only when custom style enabled)', 'yith-woocommerce-mailchimp' ),
+							'options' => array(
+								'no' => __( 'Do not round corners', 'yith-woocommerce-mailchimp' ),
+								'yes' => __( 'Round Corners', 'yith-woocommerce-mailchimp' ),
+							),
+							'default' => get_option( 'yith_wcmc_shortcode_subscribe_button_round_corners', 'no' ),
+						),
+						'background_color' => array(
+							'type'    => 'colorpicker',
+							'default' => get_option( 'yith_wcmc_shortcode_subscribe_button_background_color' ),
+						),
+						'text_color' => array(
+							'type'    => 'colorpicker',
+							'default' => get_option( 'yith_wcmc_shortcode_subscribe_button_color' ),
+						),
+						'border_color' => array(
+							'type'    => 'colorpicker',
+							'default' => get_option( 'yith_wcmc_shortcode_subscribe_button_border_color' ),
+						),
+						'background_hover_color' => array(
+							'type'    => 'colorpicker',
+							'default' => get_option( 'yith_wcmc_shortcode_subscribe_button_background_hover_color' ),
+						),
+						'text_hover_color' => array(
+							'type'    => 'colorpicker',
+							'default' => get_option( 'yith_wcmc_shortcode_subscribe_button_hover_color' ),
+						),
+						'border_hover_color' => array(
+							'type'    => 'colorpicker',
+							'default' => get_option( 'yith_wcmc_shortcode_subscribe_button_border_hover_color' ),
+						),
+						'custom_css'      => array(
+							'type'    => 'textarea',
+							'label'   => __( 'Custom CSS (only when custom style enabled)', 'yith-woocommerce-mailchimp' ),
+							'default' => get_option( 'yith_wcmc_shortcode_custom_css' ),
+						),
+					),
+				)
+			);
+			yith_plugin_fw_gutenberg_add_blocks( $blocks );
 		}
 
 		/* === HANDLE WIDGET === */
@@ -1023,37 +1267,36 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 			}
 
 			// retrieve additional params
+			$member_hash = md5( strtolower( $email ) );
 			$groups = isset( $_POST['groups'] ) ? $_POST['groups'] : '';
 			$email_type = isset( $_POST['email_type'] ) ? $_POST['email_type'] : 'html';
 			$double_optin = ! empty( $_POST['double_optin'] ) ? true : false;
 			$update_existing = ! empty( $_POST['update_existing'] ) ? true : false;
-			$replace_interests = ! empty( $_POST['replace_interests'] ) ? true : false;
-			$send_welcome = ! empty( $_POST['send_welcome'] ) ? true : false;
 			$success_message = ! empty( $_POST['success_message'] ) ? wp_kses_post( $_POST['success_message'] ) : __( 'Great! You\'re now subscribed to our newsletter', 'yith-woocommerce-mailchimp' );
 
 			// retrieve merge vars
-			$fields_row_data = $this->do_request( 'lists/merge-vars', array( 'id' => array( $list ) ) );
-			$fields_data = isset( $fields_row_data['data'][0]['merge_vars'] ) ? $fields_row_data['data'][0]['merge_vars'] : array();
+			$fields_row_data = $this->do_request( 'get', "lists/{$list}/merge-fields" );
+			$fields_data = isset( $fields_row_data['merge_fields'] ) ? $fields_row_data['merge_fields'] : array();
 
-			$data_to_submit = array();
+			$data_to_submit = new stdClass();
 			if( ! empty( $fields_data ) ){
 				foreach( $fields_data as $field ){
-					$name = $field['tag'];
-					if( isset( $_POST[ $name ] ) && '' != $_POST[ $name ] ){
-						$value = $_POST[ $name ];
+					$interest_id = $field['tag'];
+					if( isset( $_POST[ $interest_id ] ) && '' != $_POST[ $interest_id ] ){
+						$value = $_POST[ $interest_id ];
 
 						// reformat submitted values
-						if( $field['field_type'] == 'birthday' ){
+						if( $field['type'] == 'birthday' ){
 							$value = str_replace( '-', '/', substr( $value, -5 ) );
 						}
 
-						$data_to_submit[ $name ] = $value;
+						$data_to_submit->$interest_id = $value;
 					}
 				}
 			}
 
 			// retrieve groups
-			$groups_to_submit = array();
+			$groups_to_submit = new stdClass();
 			if( ! empty( $groups ) ){
 				$groups_chunks = explode( '#%,%#', $groups );
 
@@ -1063,56 +1306,38 @@ if ( ! class_exists( 'YITH_WCMC_Premium' ) ) {
 							continue;
 						}
 
-						list( $id, $name ) = explode( '-', $chunk );
+						list( $group_id, $interest_id ) = explode( '-', $chunk );
 
-						if( array_key_exists( $id, $groups_to_submit ) ){
-							if( ! in_array( $name, $groups_to_submit[ $id ]['groups'] ) ){
-								$groups_to_submit[ $id ]['groups'][] = $name;
-							}
-						}
-						else{
-							$groups_to_submit[ $id ] = array(
-								'id' => $id,
-								'groups' => array( $name )
-							);
-						}
+						$groups_to_submit->$interest_id = true;
 					}
 				}
 			}
 
 			// retrieve chosen interests
-			$available_groups = $this->do_request( 'lists/interest-groupings', array( 'id' => $list ) );
-			$available_groups_ids = ! isset( $available_groups['status'] ) ? wp_list_pluck( $available_groups, 'id' ) : array();
+			$available_groups = $this->do_request( 'get', "lists/{$list}/interest-categories" );
+			$available_groups_ids = ! isset( $available_groups['status'] ) ? wp_list_pluck( $available_groups['categories'], 'id' ) : array();
 
 			if( ! empty( $available_groups_ids ) ){
 				foreach( $available_groups_ids as $group_id ){
-					if( isset( $_POST[ $group_id ] ) && $interests = $_POST[ $group_id ] ){
-						if( array_key_exists( $group_id, $groups_to_submit ) ){
-							$groups_to_submit[ $group_id ]['groups'] = array_merge( $groups_to_submit[ $group_id ]['groups'], (array) $interests );
-						}
-						else{
-							$groups_to_submit[ $group_id ] = array(
-								'id' => (string) $group_id,
-								'groups' => (array) $interests
-							);
+					if( isset( $_POST[ $group_id ] ) && $interests_id = $_POST[ $group_id ] ){
+						if( ! empty( $interests_id ) ){
+							foreach( $interests_id as $interest_id ) {
+								$groups_to_submit->$interest_id = true;
+							}
 						}
 					}
 				}
 			}
 
-			$groups_to_submit = array_values( $groups_to_submit );
-
 			// generate argument structure to send within the request
+
 			$args = array(
-				'merge_vars' => array_merge(
-					$data_to_submit,
-					array( 'groupings' => $groups_to_submit )
-				),
-				'email_type' => $email_type,
-				'double_optin' => $double_optin,
-				'update_existing' => $update_existing,
-				'replace_interests' => $replace_interests,
-				'send_welcome' => $send_welcome
+				'email_address'   => $email,
+				'email_type'      => $email_type,
+				'status'          => $double_optin ? 'pending' : 'subscribed',
+				'merge_fields'    => $data_to_submit,
+				'interests'       => $groups_to_submit,
+				'update_existing' => $update_existing
 			);
 
 			$res = $this->subscribe( $list, $email, $args );
