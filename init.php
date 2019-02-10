@@ -3,7 +3,7 @@
  * Plugin Name: HYP Chimp
  * Plugin URI: https://github.com/hypericumimpex/hyp-chimp/
  * Description: <code><strong>HYP Chimp</strong></code>Integrare Hypericum Mailchimp</a>
- * Version: 2.0
+ * Version: 2.0.0
  * Author: Romeo C.
  * Author URI: https://github.com/hypericumimpex/
  * Text Domain: yith-woocommerce-mailchimp
@@ -13,7 +13,7 @@
  *
  * @author Romeo C.
  * @package HYP Chimp
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 /*  This program is free software; you can redistribute it and/or modify
